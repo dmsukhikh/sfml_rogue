@@ -4,10 +4,19 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
 find_package(SFML COMPONENTS system window graphics audio REQUIRED)
+
 add_library(dependencies_interface INTERFACE)
-target_include_directories(dependencies_interface INTERFACE include)
+add_library(gamegui src/gamegui/GuiObject.cpp
+                    src/gamegui/IngameWindow.cpp
+                    src/gamegui/Packer.cpp
+                    src/gamegui/Button.cpp)
+
+
+target_include_directories(dependencies_interface INTERFACE include 
+                                                            include/gamegui)
 target_link_libraries(dependencies_interface INTERFACE
                       sfml-system sfml-window sfml-graphics sfml-audio)
+target_link_libraries(dependencies_interface INTERFACE gamegui)
 
 add_executable(main src/main.cpp)
 target_link_libraries(main dependencies_interface)
