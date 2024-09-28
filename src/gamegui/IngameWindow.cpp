@@ -7,6 +7,5 @@
 class game::IngameWindow::_cimpl
 {
     static sf::RenderWindow &_raw_win;
-    std::vector<std::unique_ptr<game::GuiObject>> _data;
 
 };
