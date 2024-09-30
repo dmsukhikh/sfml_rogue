@@ -7,7 +7,7 @@ namespace game
 class AbsolutePacker final : public AbstractPacker
 {
   public:
-    AbsolutePacker(uint64_t width, uint64_t height);
+    AbsolutePacker();
     AbsolutePacker(AbsolutePacker &&op) noexcept;
     AbsolutePacker &operator=(AbsolutePacker &&op) noexcept;
     ~AbsolutePacker() override;

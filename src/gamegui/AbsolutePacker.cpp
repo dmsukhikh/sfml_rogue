@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <sys/types.h>
 
-game::AbsolutePacker::AbsolutePacker(uint64_t width, uint64_t height)
-    : AbstractPacker(width, height)
+game::AbsolutePacker::AbsolutePacker()
+    : AbstractPacker(0, 0)
 {
 }
 
@@ -15,6 +15,7 @@ game::AbsolutePacker::AbsolutePacker(AbsolutePacker &&op) noexcept
 game::AbsolutePacker &
 game::AbsolutePacker::operator=(AbsolutePacker &&op) noexcept
 {
+    game::AbstractPacker::operator=(std::move(op));
     return *this;
 }
 
@@ -22,7 +23,7 @@ void game::AbsolutePacker::putObject(const GuiObject &op, uint64_t x,
                                      uint64_t y)
 {
     auto temp = op.clone();
-    temp->_setPos(x, y);
+    temp->_setPos(_x+x, _y+y);
     _data.push_back(std::move(temp));
 }
 
@@ -34,7 +35,7 @@ void game::AbsolutePacker::putObject(std::unique_ptr<GuiObject> &&op,
     // запихивать в смарт-поинтер глупо. Поэтому для перемещения необходимо
     // сразу размещать объект на куче
 
-    op->_setPos(x, y);
+    op->_setPos(_x+x, _y+y);
     _data.push_back(std::move(op));
 }
 

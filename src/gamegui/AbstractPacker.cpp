@@ -1,5 +1,6 @@
 #include "../../include/gamegui/AbstractPacker.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <cstdint>
 #include <memory>
 #include "../../include/gamegui/Button.hpp"
 
@@ -61,5 +62,16 @@ std::unique_ptr<game::GuiObject> game::AbstractPacker::clone() const
 
     auto t = std::make_unique<AbstractPacker>(_width, _height);
     t->_data = std::move(temp);
+    t->_x = _x;
+    t->_y = _y;
     return t;
 }
+
+
+void game::AbstractPacker::_setPos(uint64_t newx, uint64_t newy)
+{
+    for (auto &&i: _data)
+        i->_setPos(i->getPos().x - _x + newx, i->getPos().y - _y + newy);
+    game::GuiObject::_setPos(newx, newy);
+}
+

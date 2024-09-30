@@ -5,6 +5,11 @@
 namespace game
 {
 
+struct Dot
+{
+    uint64_t x, y;
+};
+
 class GuiObject
 {
   protected:
@@ -26,6 +31,8 @@ class GuiObject
     virtual void _show(sf::RenderWindow& target_window) = 0;
     virtual void _resize(uint64_t width, uint64_t height);
     virtual void _setPos(uint64_t x, uint64_t y);
+    Dot getPos() const;
+    Dot getSize() const;
 };
 
 } // namespace game

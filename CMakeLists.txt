@@ -10,7 +10,8 @@ add_library(gamegui src/gamegui/GuiObject.cpp
                     src/gamegui/IngameWindow.cpp
                     src/gamegui/Button.cpp
                     src/gamegui/AbsolutePacker.cpp
-                    src/gamegui/AbstractPacker.cpp)
+                    src/gamegui/AbstractPacker.cpp
+                    src/gamegui/GridPacker.cpp)
 
 
 target_include_directories(dependencies_interface INTERFACE include 

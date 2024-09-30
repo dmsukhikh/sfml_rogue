@@ -13,3 +13,13 @@ void game::GuiObject::_setPos(uint64_t x, uint64_t y)
     _x = x;
     _y = y;
 }
+
+game::Dot game::GuiObject::getPos() const
+{
+    return {_x, _y};
+}
+
+game::Dot game::GuiObject::getSize() const
+{
+    return {_width, _height};
+}

@@ -13,6 +13,7 @@ class game::Button::_cimpl
     sf::Text _text;
     sf::Color _bg;
     uint64_t _font;
+    float _BorderThickness = 5.0;
     sf::RectangleShape _rawButton;
 
     void _resizeRawButton(uint64_t newWidth, uint64_t newHeight)
@@ -35,6 +36,9 @@ class game::Button::_cimpl
         _rawButton = sf::RectangleShape(
             {static_cast<float>(width), static_cast<float>(height)});
         _rawButton.setFillColor(bg);
+        _rawButton.setOutlineColor(
+            sf::Color(255 - bg.r, 255 - bg.g, 255 - bg.g));
+        _rawButton.setOutlineThickness(_BorderThickness);
         _text.setString(text);
         _text.setFont(_f);
         _text.setFillColor(fg);
@@ -149,7 +153,7 @@ void game::Button::_resize(uint64_t width, uint64_t height)
     game::GuiObject::_resize(width, height);
     _impl->_rawButton.setSize(
         {static_cast<float>(width), static_cast<float>(height)});
-    // подумать над ресайзом текста
+    _impl->_setTextProperties(width, height);
 }
 
 void game::Button::_setPos(uint64_t x, uint64_t y)

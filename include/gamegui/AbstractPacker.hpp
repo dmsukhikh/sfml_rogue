@@ -20,10 +20,10 @@ class AbstractPacker : public GuiObject
     AbstractPacker& operator=(AbstractPacker &&op) noexcept;
     ~AbstractPacker() override;
 
-    void displayWidgets(sf::RenderWindow &op);
+    virtual void displayWidgets(sf::RenderWindow &op);
+    void _setPos(uint64_t _x, uint64_t _y) override;
     void _show(sf::RenderWindow &op) override;
     std::unique_ptr<GuiObject> clone() const override;
-    
 };
 } // namespace game
 
