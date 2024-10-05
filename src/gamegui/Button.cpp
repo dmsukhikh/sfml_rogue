@@ -15,9 +15,12 @@ class game::Button::_cimpl
 
     bool _isToggled = false;
     sf::Text _text;
-    sf::Color _bg, _fg, _toggledBg;
+    sf::Color _bg = sf::Color::White, 
+              _fg = sf::Color::Black, 
+              _toggledBg = sf::Color::Green,
+              _outlinecol = sf::Color::Black;
     std::function<void()> _invokingFunction;
-    uint64_t _font;
+    uint64_t _font = 0;
     float _BorderThickness = 5.0;
     sf::RectangleShape _rawButton;
 
@@ -28,9 +31,7 @@ class game::Button::_cimpl
     }
 
     // ! _BorderThickness <= width, height, по умолчанию 5
-    _cimpl(uint32_t width, uint32_t height, const std::string &text,
-           uint32_t font, sf::Color fg, sf::Color bg)
-        : _font(font), _bg(bg), _fg(fg)
+    _cimpl(uint32_t width, uint32_t height)
     {
         // Наверное, так делать нельзя. But I don't care, my life - my rules
         if (!_isFontInit)
@@ -47,16 +48,15 @@ class game::Button::_cimpl
         _rawButton = sf::RectangleShape(
             {static_cast<float>(width-1*_BorderThickness), 
              static_cast<float>(height-1*_BorderThickness)});
-        _rawButton.setFillColor(bg);
-        _rawButton.setOutlineColor(
-            sf::Color(255 - bg.r, 255 - bg.g, 255 - bg.g));
+        _rawButton.setFillColor(_bg);
+        _rawButton.setOutlineColor(_outlinecol);
         _rawButton.setOutlineThickness(_BorderThickness);
-        _text.setString(text);
         _text.setFont(_f);
-        _text.setFillColor(fg);
+        _text.setFillColor(_fg);
         _setTextProperties(width, height);
     }
 
+    // Нужен при ресайзе кнопки
     void _setTextProperties(uint64_t width, uint64_t height)
     {
         std::size_t chsize;
@@ -87,12 +87,10 @@ class game::Button::_cimpl
 bool game::Button::_cimpl::_isFontInit = false;
 sf::Font game::Button::_cimpl::_f{ };
 
-// !!! ПЕРЕДЕЛАТЬ: вынести все из конструктора в сеттеры
-game::Button::Button(uint32_t width, uint32_t height, const std::string &txt,
-                     uint32_t font, sf::Color fg, sf::Color bg)
+game::Button::Button(uint32_t width, uint32_t height)
     : GuiObject(width, height)
 {
-    _impl = std::make_unique<_cimpl>(width, height, txt, font, fg, bg);
+    _impl = std::make_unique<_cimpl>(width, height);
 }
 
 game::Button::Button(const Button &op) noexcept : _impl(nullptr), GuiObject(0, 0)
@@ -140,15 +138,17 @@ game::Button::Button(Button &&op) noexcept : _impl(nullptr), GuiObject(0, 0)
 
 std::unique_ptr<game::GuiObject> game::Button::clone() const
 {
-    std::string rawtxt = _impl->_text.getString().toAnsiString();
-    auto _font = _impl->_font;
-    auto _fg = _impl->_text.getFillColor();
-
-    auto temp = std::make_unique<game::Button>(_width, _height, rawtxt, _font,
-                                               _impl->_fg, _impl->_bg);
+    auto temp = std::make_unique<game::Button>(_width, _height);
+    temp->setBgColor(_impl->_bg);
+    temp->setFgColor(_impl->_fg);
+    temp->setOutlineColor(_impl->_outlinecol);
+    temp->setOutlineThickness(_impl->_BorderThickness);
+    temp->setToggleColor(_impl->_toggledBg);
+    temp->setFont(_impl->_font);
+    temp->setText(_impl->_text.getString());
+    temp->setFunc(_impl->_invokingFunction);
     temp->_setPos(_impl->_rawButton.getPosition().x,
                   _impl->_rawButton.getPosition().y);
-    temp->_impl->_invokingFunction = _impl->_invokingFunction;
     return temp;
 }
 
@@ -215,4 +215,45 @@ void game::Button::_invoke(const sf::Event &ev)
 void game::Button::setFunc(const std::function<void()> &f)
 {
     _impl->_invokingFunction = f;
+}
+
+void game::Button::setBgColor(const sf::Color &col)
+{
+    _impl->_bg = col;
+    _impl->_rawButton.setFillColor(col);
+}
+
+void game::Button::setFgColor(const sf::Color &col)
+{
+    _impl->_fg = col;
+    _impl->_text.setFillColor(col);
+}
+
+void game::Button::setOutlineColor(const sf::Color &col)
+{
+    _impl->_outlinecol = col;
+    _impl->_rawButton.setOutlineColor(col);
+}
+
+void game::Button::setToggleColor(const sf::Color &col)
+{
+    _impl->_toggledBg = col;
+}
+
+void game::Button::setText(const std::string &txt)
+{
+    _impl->_text.setString(txt);
+    _impl->_setTextProperties(_width, _height);
+}
+
+void game::Button::setFont(uint64_t font)
+{
+   _impl->_font = font;
+   _impl->_setTextProperties(_width, _height);
+}
+
+void game::Button::setOutlineThickness(float thickness)
+{
+    _impl->_BorderThickness = thickness;
+    _impl->_rawButton.setOutlineThickness(thickness);
 }

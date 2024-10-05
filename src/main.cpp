@@ -1,4 +1,5 @@
 #include "../gamegui/GameGUI.hpp"
+#include <SFML/Graphics/Color.hpp>
 #include <iostream>
 #include <string>
 
@@ -12,8 +13,15 @@ int main()
     sf::RenderWindow j(sf::VideoMode(1500, 720), "SFML: Bebra");
 
     game::GridPacker jopa(600, 400), jopasmall(0, 0);
-    game::Button upbtn(100, 100, "click me");
-    game::Button dwbtn(100, 100, "click me", 0, sf::Color::Black, sf::Color::Cyan);
+    game::Button upbtn(100, 100);
+    game::Button dwbtn(100, 100);
+
+    upbtn.setToggleColor({120, 130, 120});
+    dwbtn.setBgColor(sf::Color::Cyan);
+    dwbtn.setToggleColor({120, 130, 120});
+    upbtn.setText("upper");
+    dwbtn.setText("lower");
+    
 
     upbtn.setFunc([](){std::cout << "clicked upper button" << std::endl;});
     dwbtn.setFunc([](){std::cout << "clicked lower button" << std::endl;});
