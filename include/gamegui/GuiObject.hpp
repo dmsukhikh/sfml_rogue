@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Event.hpp>
 #include <memory>
 
 namespace game
@@ -31,6 +32,7 @@ class GuiObject
     virtual void _show(sf::RenderWindow& target_window) = 0;
     virtual void _resize(uint64_t width, uint64_t height);
     virtual void _setPos(uint64_t x, uint64_t y);
+    virtual void _invoke(const sf::Event &ev);
     Dot getPos() const;
     Dot getSize() const;
 };

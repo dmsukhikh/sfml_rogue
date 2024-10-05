@@ -124,9 +124,13 @@ class game::GridPacker::_cimpl
                 case Anchor::EXPAND:
                     height = _mapHeight[i.row];
             }
-        
-            _base._data[i.idx]->_setPos(_mapPosX[i.col], _mapPosY[i.row]);
-            _base._data[i.idx]->_resize(width, height);    
+
+            // Выравнивание по центру, так что считаем сдвиг
+            uint64_t offset_x = (_mapWidth[i.col] - width) / 2,
+                     offset_y = (_mapHeight[i.row] - height) / 2;
+            _base._data[i.idx]->_resize(width, height);
+            _base._data[i.idx]->_setPos(_mapPosX[i.col] + offset_x,
+                                        _mapPosY[i.row] + offset_y);
         }
     }
 };

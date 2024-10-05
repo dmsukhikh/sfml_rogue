@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <string>
+#include <functional>
 
 namespace game
 {
@@ -24,6 +25,8 @@ class Button : public GuiObject
     void _show(sf::RenderWindow &op) override;
     void _resize(uint64_t width, uint64_t height) override;
     void _setPos(uint64_t x, uint64_t y) override;
+    void _invoke(const sf::Event &ev) override;
+    void setFunc(const std::function<void()> &f);
 
     std::unique_ptr<GuiObject> clone() const override;
     ~Button() override;

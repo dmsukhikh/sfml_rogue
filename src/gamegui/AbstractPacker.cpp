@@ -75,3 +75,8 @@ void game::AbstractPacker::_setPos(uint64_t newx, uint64_t newy)
     game::GuiObject::_setPos(newx, newy);
 }
 
+void game::AbstractPacker::_invoke(const sf::Event &ev)
+{
+    for (auto &&i: _data) i->_invoke(ev);
+}
+
