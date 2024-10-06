@@ -1,4 +1,5 @@
 #include "../../include/gamegui/GuiObject.hpp"
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 
 game::GuiObject::GuiObject(uint64_t w, uint64_t h) : _height(h), _width(w) {}
@@ -25,7 +26,7 @@ game::Dot game::GuiObject::getSize() const
     return {_width, _height};
 }
 
-void game::GuiObject::_invoke(const sf::Event &ev)
+void game::GuiObject::_invoke(const sf::RenderWindow &capture, const sf::Event &ev)
 {
 
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/Event.hpp>
 #include <memory>
 
@@ -14,6 +15,7 @@ struct Dot
 class GuiObject
 {
   protected:
+    // Переделать: заменить типы _x и _y на простые int64
     uint64_t _width, _height, _x = 0, _y = 0;
 
   public:
@@ -32,7 +34,10 @@ class GuiObject
     virtual void _show(sf::RenderWindow& target_window) = 0;
     virtual void _resize(uint64_t width, uint64_t height);
     virtual void _setPos(uint64_t x, uint64_t y);
-    virtual void _invoke(const sf::Event &ev);
+
+    // Передаем окно захвата для грамотной обработки координат мышки в 
+    // игровом пространстве
+    virtual void _invoke(const sf::RenderWindow& capture, const sf::Event &ev);
     Dot getPos() const;
     Dot getSize() const;
 };

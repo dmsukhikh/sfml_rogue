@@ -118,10 +118,19 @@ game::Button &game::Button::operator=(Button &&op) noexcept
     {
         _impl = std::move(op._impl);
         op._impl = nullptr;
+        _height = op._height;
+        _width = op._width;
+        _x = op._x;
+        _y = op._y;
+        op._height = 0;
+        op._width = 0;
+        op._x = 0;
+        op._y = 0;
     }
     return *this;
 }
 
+// Поменять это недоразумение на что-то более вменяемое
 game::Button::Button(Button &&op) noexcept : _impl(nullptr), GuiObject(0, 0)
 {
     if (op._impl) 
@@ -129,9 +138,13 @@ game::Button::Button(Button &&op) noexcept : _impl(nullptr), GuiObject(0, 0)
         _impl = std::move(op._impl);
         _height = op._height;
         _width = op._width;
-        op._impl = nullptr;
+        _x = op._x;
+        _y = op._y;
         op._height = 0;
         op._width = 0;
+        op._x = 0;
+        op._y = 0;
+        op._impl = nullptr;
     }
 }
 
@@ -177,13 +190,13 @@ void game::Button::_setPos(uint64_t x, uint64_t y)
     _impl->_setTextProperties(_width, _height);
 }
 
-void game::Button::_invoke(const sf::Event &ev) 
+void game::Button::_invoke(const sf::RenderWindow &capture, const sf::Event &ev) 
 {
     switch (ev.type)
     {
     case sf::Event::EventType::MouseButtonPressed:
         if (_impl->_rawButton.getGlobalBounds().contains(
-                sf::Vector2f(ev.mouseButton.x, ev.mouseButton.y)))
+                capture.mapPixelToCoords({ev.mouseButton.x, ev.mouseButton.y})))
         {
             _impl->_invokingFunction();
         }
@@ -191,14 +204,15 @@ void game::Button::_invoke(const sf::Event &ev)
 
     case sf::Event::EventType::MouseMoved:
         if (_impl->_rawButton.getGlobalBounds().contains(
-                sf::Vector2f(ev.mouseMove.x, ev.mouseMove.y)) &&
+                capture.mapPixelToCoords({ev.mouseMove.x, ev.mouseMove.y})) &&
             !_impl->_isToggled)
         {
             _impl->_isToggled = true;
             _impl->_rawButton.setFillColor(_impl->_toggledBg);
         }
         else if (!_impl->_rawButton.getGlobalBounds().contains(
-                     sf::Vector2f(ev.mouseMove.x, ev.mouseMove.y)) &&
+                     capture.mapPixelToCoords(
+                         {ev.mouseMove.x, ev.mouseMove.y})) &&
                  _impl->_isToggled)
         {
             _impl->_isToggled = false;

@@ -12,40 +12,35 @@ int main()
 {
     sf::RenderWindow j(sf::VideoMode(1500, 720), "SFML: Bebra");
 
-    game::GridPacker jopa(600, 400), jopasmall(0, 0);
-    game::Button upbtn(100, 100);
-    game::Button dwbtn(100, 100);
+    sf::Color bgcol{255/2, 200, 255};
+    int left = 0, right = 255;
+    auto changeColor = [right, &bgcol](double scale)
+    {
+        bgcol.r = scale*right;
+    };
 
-    upbtn.setToggleColor({120, 130, 120});
-    dwbtn.setBgColor(sf::Color::Cyan);
-    dwbtn.setToggleColor({120, 130, 120});
-    upbtn.setText("upper");
-    dwbtn.setText("lower");
-    
+    game::GridPacker jopa(300, 400), jopasmall(0, 0);
+    game::Slider coc(600, 40, left, right);
+    game::Button no(30, 30);
+    no.setText("bebra");
+    coc.setFunc(changeColor);
 
-    upbtn.setFunc([](){std::cout << "clicked upper button" << std::endl;});
-    dwbtn.setFunc([](){std::cout << "clicked lower button" << std::endl;});
+    jopa.putObject(coc, 1, 0, game::GridPacker::Anchor::EXPAND);
+    jopa.putObject(no, 0, 0);
 
-    jopasmall.putObject(dwbtn, 0, 0);
-    jopasmall.putObject(dwbtn, 1, 0);
-    jopasmall.putObject(dwbtn, 0, 1);
-    jopasmall.putObject(dwbtn, 1, 1);
-    jopa.putObject(upbtn, 0, 0);
-    jopa.putObject(upbtn, 1, 0);
-    jopa.putObject(upbtn, 0, 1);
-    jopa.putObject(jopasmall, 1, 1);
 
     sf::Event ev;
 
+    int x =0;
     while (j.isOpen())
     {
-        j.clear(sf::Color::Magenta);
+        j.clear(bgcol);
         jopa._show(j);
         j.display();
 
         while (j.pollEvent(ev))
         {
-            jopa._invoke(ev);
+            jopa._invoke(j, ev);
         }
     }
 }
