@@ -23,7 +23,7 @@ class AbstractPacker : public GuiObject
     virtual void displayWidgets(sf::RenderWindow &op);
     void _invoke(const sf::RenderWindow &capture, const sf::Event &ev) override;
     void _setPos(uint64_t _x, uint64_t _y) override;
-    void _show(sf::RenderWindow &op) override;
+    void show(sf::RenderWindow &op) override;
     std::unique_ptr<GuiObject> clone() const override;
 };
 } // namespace game

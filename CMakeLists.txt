@@ -12,7 +12,8 @@ add_library(gamegui src/gamegui/GuiObject.cpp
                     src/gamegui/AbstractPacker.cpp
                     src/gamegui/GridPacker.cpp
                     src/gamegui/Image.cpp
-                    src/gamegui/Slider.cpp)
+                    src/gamegui/Slider.cpp
+                    src/gamegui/Label.cpp)
 
 
 target_include_directories(dependencies_interface INTERFACE include 

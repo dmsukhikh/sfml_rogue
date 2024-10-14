@@ -31,7 +31,7 @@ void game::Image::_setPos(uint64_t x, uint64_t y)
     _im.setPosition(sf::Vector2f(x, y));
 }
 
-void game::Image::_show(sf::RenderWindow &rend)
+void game::Image::show(sf::RenderWindow &rend)
 {
     rend.draw(_im);
 }

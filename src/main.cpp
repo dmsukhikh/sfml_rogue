@@ -11,22 +11,20 @@ void f()
 int main()
 {
     sf::RenderWindow j(sf::VideoMode(1500, 720), "SFML: Bebra");
+    game::GridPacker bob(1200, 300);
+    game::Slider slide(10, 10, 0, 100);
 
-    sf::Color bgcol{255/2, 200, 255};
-    int left = 0, right = 255;
-    auto changeColor = [right, &bgcol](double scale)
-    {
-        bgcol.r = scale*right;
-    };
+    auto i = slide.getBorders();
+    std::string out =
+        std::to_string((int)(slide.getBorders().x + slide.getBorders().y) / 2);
+    slide.setFunc([i, &out](double scale)
+                  { out = std::to_string((int)(i.y * scale)); });
 
-    game::GridPacker jopa(300, 400), jopasmall(0, 0);
-    game::Slider coc(600, 40, left, right);
-    game::Button no(30, 30);
-    no.setText("bebra");
-    coc.setFunc(changeColor);
+    game::Label boba(10, 10, out);
+    boba.setColor({100, 200, 100});
 
-    jopa.putObject(coc, 1, 0, game::GridPacker::Anchor::EXPAND);
-    jopa.putObject(no, 0, 0);
+    bob.putObject(slide, 0, 0);
+    bob.putObject(boba, 0, 1);
 
 
     sf::Event ev;
@@ -34,13 +32,13 @@ int main()
     int x =0;
     while (j.isOpen())
     {
-        j.clear(bgcol);
-        jopa._show(j);
+        j.clear(sf::Color::Magenta);
+        bob.show(j);
         j.display();
 
         while (j.pollEvent(ev))
         {
-            jopa._invoke(j, ev);
+            bob._invoke(j, ev);
         }
     }
 }

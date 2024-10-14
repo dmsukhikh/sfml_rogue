@@ -168,7 +168,7 @@ std::unique_ptr<game::GuiObject> game::Button::clone() const
 game::Button::~Button() = default;
 
 
-void game::Button::_show(sf::RenderWindow &op)
+void game::Button::show(sf::RenderWindow &op)
 {
     op.draw(_impl->_rawButton);
     op.draw(_impl->_text);

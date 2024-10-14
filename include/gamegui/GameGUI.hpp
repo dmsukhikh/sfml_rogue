@@ -4,3 +4,4 @@
 #include "GridPacker.hpp"
 #include "Image.hpp"
 #include "Slider.hpp"
+#include "Label.hpp"

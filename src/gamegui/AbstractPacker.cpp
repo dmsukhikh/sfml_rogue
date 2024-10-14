@@ -37,7 +37,7 @@ game::AbstractPacker& game::AbstractPacker::operator=(AbstractPacker &&op) noexc
     return *this;
 }
 
-void game::AbstractPacker::_show(sf::RenderWindow &op)
+void game::AbstractPacker::show(sf::RenderWindow &op)
 {
     displayWidgets(op);
 }
@@ -46,7 +46,7 @@ void game::AbstractPacker::displayWidgets(sf::RenderWindow &op)
 {
     for (auto &&i: _data) 
     {
-        i->_show(op);
+        i->show(op);
     }
 }
 

@@ -7,9 +7,10 @@
 namespace game
 {
 
+template<typename T>
 struct Dot
 {
-    uint64_t x, y;
+    T x, y;
 };
 
 class GuiObject
@@ -31,15 +32,15 @@ class GuiObject
     // Ну и шизофрения
 
     // 
-    virtual void _show(sf::RenderWindow& target_window) = 0;
+    virtual void show(sf::RenderWindow& target_window) = 0;
     virtual void _resize(uint64_t width, uint64_t height);
     virtual void _setPos(uint64_t x, uint64_t y);
 
     // Передаем окно захвата для грамотной обработки координат мышки в 
     // игровом пространстве
     virtual void _invoke(const sf::RenderWindow& capture, const sf::Event &ev);
-    Dot getPos() const;
-    Dot getSize() const;
+    Dot<uint64_t> getPos() const;
+    Dot<uint64_t> getSize() const;
 };
 
 } // namespace game

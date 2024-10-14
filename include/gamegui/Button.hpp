@@ -20,7 +20,7 @@ class Button : public GuiObject
     Button &operator=(const Button &op) noexcept;
     Button &operator=(Button &&op) noexcept;
 
-    void _show(sf::RenderWindow &op) override;
+    void show(sf::RenderWindow &op) override;
     void _resize(uint64_t width, uint64_t height) override;
     void _setPos(uint64_t x, uint64_t y) override;
     void _invoke(const sf::RenderWindow &capture, const sf::Event &ev) override;

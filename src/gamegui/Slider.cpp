@@ -34,8 +34,14 @@ class game::Slider::_cimpl
             switcher.setPosition(sf::Vector2f(x, switcher.getPosition().y));
         curCount = (switcher.getPosition().x + switcherSize / 2.0 - base._x) /
                    base._width;
+        
+        // Нормализация curCount: запихиваем в invokingFunc нормализованное 
+        // значение curCount
+        double min = (switcherSize/2.)/base._width,
+               max = (base._width - switcherSize/2.)/base._width;
+
         _resizeDrawable();
-        invokingFunc(curCount);
+        invokingFunc((curCount - min) / (max - min));
     }
 
     void _moveDrawable()
@@ -122,7 +128,7 @@ game::Slider &game::Slider::operator=(Slider &&op) noexcept
     return *this;
 }
 
-void game::Slider::_show(sf::RenderWindow &r)
+void game::Slider::show(sf::RenderWindow &r)
 {
     for (auto &i : _impl->_getDrawVec())
     {
@@ -193,4 +199,9 @@ void game::Slider::_invoke(const sf::RenderWindow &capture, const sf::Event &ev)
 void game::Slider::setFunc(const std::function<void(double)> &f)
 {
     _impl->invokingFunc = f;
+}
+
+game::Dot<double> game::Slider::getBorders() const
+{
+    return {_impl->leftBorder, _impl->rightBorder};
 }
