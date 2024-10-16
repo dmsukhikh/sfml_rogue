@@ -139,7 +139,7 @@ class game::GridPacker::_cimpl
 game::GridPacker::GridPacker(uint64_t width, uint64_t height)
     : AbstractPacker(width, height), _impl(nullptr)
 {
-    auto& i = *this;
+    auto& i = *this; // чезабретто
     _impl = std::make_unique<_cimpl>(i);
 }
 
@@ -202,16 +202,23 @@ void game::GridPacker::_resize(uint64_t width, uint64_t height)
 
 std::unique_ptr<game::GuiObject> game::GridPacker::clone() const
 {
-    std::vector<std::unique_ptr<GuiObject>> temp(_data.size());
-    for (std::size_t i = 0; i < _data.size(); ++i)
-    {
-        temp[i] = _data[i]->clone();
-    }
-
     auto t = std::make_unique<GridPacker>(_width, _height);
-    t->_data = std::move(temp);
+    dynamic_cast<AbstractPacker &>(*t) = *this;
     *t->_impl = *_impl;
-    t->_x = _x;
-    t->_y = _y;
     return t;
+}
+
+game::GridPacker::GridPacker(const game::GridPacker &op) :
+    AbstractPacker(op)
+{
+    _impl = std::make_unique<_cimpl>(*this);
+    *_impl = *op._impl;
+}
+
+
+game::GridPacker& game::GridPacker::operator=(const game::GridPacker &op)
+{
+    dynamic_cast<AbstractPacker &>(*this) = op;
+    *_impl = *op._impl;
+    return *this;
 }

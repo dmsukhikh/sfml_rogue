@@ -14,12 +14,9 @@ game::AbstractPacker::AbstractPacker(AbstractPacker &&op) noexcept
     : game::GuiObject(0, 0)
 {
     _data = std::move(op._data);
-    _width = op._width;
-    _height = op._height;
+    dynamic_cast<GuiObject &>(*this) = std::move(op);
 
     op._data = std::vector<std::unique_ptr<GuiObject>>();
-    _width = 0;
-    _height = 0;
 }
 
 game::AbstractPacker& game::AbstractPacker::operator=(AbstractPacker &&op) noexcept
@@ -27,12 +24,28 @@ game::AbstractPacker& game::AbstractPacker::operator=(AbstractPacker &&op) noexc
     if (this != &op)
     {
         _data = std::move(op._data);
-        _width = op._width;
-        _height = op._height;
+        dynamic_cast<GuiObject &>(*this) = std::move(op);
 
         op._data = std::vector<std::unique_ptr<GuiObject>>();
-        _width = 0;
-        _height = 0;
+    }
+    return *this;
+}
+
+game::AbstractPacker::AbstractPacker(const AbstractPacker &op) :
+    GuiObject(op)
+{
+    for (std::size_t i = 0; i < op._data.size(); ++i)
+    {
+        _data.push_back(op._data[i]->clone());
+    }
+}
+
+game::AbstractPacker& game::AbstractPacker::operator=(const AbstractPacker &op)
+{
+    dynamic_cast<game::GuiObject &>(*this) = op;
+    for (std::size_t i = 0; i < op._data.size(); ++i)
+    {
+        _data.push_back(op._data[i]->clone());
     }
     return *this;
 }
@@ -62,8 +75,7 @@ std::unique_ptr<game::GuiObject> game::AbstractPacker::clone() const
 
     auto t = std::make_unique<AbstractPacker>(_width, _height);
     t->_data = std::move(temp);
-    t->_x = _x;
-    t->_y = _y;
+    dynamic_cast<GuiObject &>(*t) = *this;
     return t;
 }
 

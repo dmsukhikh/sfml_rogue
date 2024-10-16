@@ -14,8 +14,8 @@ class AbstractPacker : public GuiObject
   public:
     // Класс-интерфейс, основа для других упаковщиков. Сам по себе безполезен
     AbstractPacker(uint64_t width, uint64_t height);
-    AbstractPacker(const AbstractPacker& op) = delete;
-    AbstractPacker& operator=(const AbstractPacker& op) = delete;
+    AbstractPacker(const AbstractPacker& op);
+    AbstractPacker& operator=(const AbstractPacker& op);
     AbstractPacker(AbstractPacker &&op) noexcept;
     AbstractPacker& operator=(AbstractPacker &&op) noexcept;
     ~AbstractPacker() override;

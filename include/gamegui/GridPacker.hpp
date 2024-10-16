@@ -20,9 +20,9 @@ class GridPacker final : public AbstractPacker
 
 
     GridPacker(uint64_t width, uint64_t height);
-    GridPacker(const GridPacker &op) = delete;
+    GridPacker(const GridPacker &op);
     GridPacker(GridPacker &&op) noexcept;
-    GridPacker &operator=(const GridPacker &op) = delete;
+    GridPacker &operator=(const GridPacker &op);
     GridPacker &operator=(GridPacker &&op) noexcept;
     ~GridPacker() override;
 
