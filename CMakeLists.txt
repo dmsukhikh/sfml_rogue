@@ -15,12 +15,14 @@ add_library(gamegui src/gamegui/GuiObject.cpp
                     src/gamegui/Slider.cpp
                     src/gamegui/Label.cpp)
 
+add_library(base src/Game.cpp
+                 src/Settings.cpp)
 
 target_include_directories(dependencies_interface INTERFACE include 
                                                             include/gamegui)
 target_link_libraries(dependencies_interface INTERFACE
                       sfml-system sfml-window sfml-graphics sfml-audio)
-target_link_libraries(dependencies_interface INTERFACE gamegui)
+target_link_libraries(dependencies_interface INTERFACE gamegui base)
 
 add_executable(main src/main.cpp)
 target_link_libraries(main dependencies_interface)
