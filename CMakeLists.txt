@@ -22,7 +22,8 @@ target_include_directories(dependencies_interface INTERFACE include
                                                             include/gamegui)
 target_link_libraries(dependencies_interface INTERFACE
                       sfml-system sfml-window sfml-graphics sfml-audio)
-target_link_libraries(dependencies_interface INTERFACE gamegui base)
+
+target_link_libraries(dependencies_interface INTERFACE base gamegui)
 
 add_executable(main src/main.cpp)
 target_link_libraries(main dependencies_interface)
