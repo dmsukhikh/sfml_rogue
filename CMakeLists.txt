@@ -5,6 +5,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
 find_package(SFML COMPONENTS system window graphics audio REQUIRED)
 
+
+
 add_library(dependencies_interface INTERFACE)
 add_library(gamegui src/gamegui/GuiObject.cpp
                     src/gamegui/Button.cpp
@@ -18,12 +20,22 @@ add_library(gamegui src/gamegui/GuiObject.cpp
 add_library(base src/Game.cpp
                  src/Settings.cpp)
 
+add_library(entities src/entities/Entity.cpp
+                     src/entities/Wall.cpp
+                     src/entities/Gamer.cpp)
+
+add_library(vecmath src/vecmath.cpp)
+
+
+
 target_include_directories(dependencies_interface INTERFACE include 
-                                                            include/gamegui)
+                                                            include/gamegui
+                                                            include/entities)
 target_link_libraries(dependencies_interface INTERFACE
                       sfml-system sfml-window sfml-graphics sfml-audio)
 
-target_link_libraries(dependencies_interface INTERFACE base gamegui)
+target_link_libraries(entities PUBLIC vecmath)
+target_link_libraries(dependencies_interface INTERFACE base gamegui entities)
 
 add_executable(main src/main.cpp)
 target_link_libraries(main dependencies_interface)
