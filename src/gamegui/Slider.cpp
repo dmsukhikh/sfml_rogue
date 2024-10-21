@@ -4,6 +4,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <functional>
 #include <memory>
+#include <iostream>
 
 class game::Slider::_cimpl
 {
@@ -82,7 +83,24 @@ class game::Slider::_cimpl
         }
     }
 
+    _cimpl(const _cimpl &op) = default;
 
+    _cimpl &operator=(const _cimpl &op)
+    {
+        leftSide = op.leftSide;
+        rightSide = op.rightSide;
+        switcher = op.switcher;
+        lsColor = op.lsColor;
+        rsColor = op.rsColor;
+        swColor = op.swColor;
+        outlineColor = op.outlineColor;
+        leftBorder = op.leftBorder;
+        rightBorder = op.rightBorder;
+        curCount = op.curCount;
+        borderThickness = op.borderThickness;
+        invokingFunc = op.invokingFunc;
+        return *this;
+    }
 };
 
 game::Slider::Slider(uint64_t width, uint64_t height, double left, double right)
@@ -91,21 +109,30 @@ game::Slider::Slider(uint64_t width, uint64_t height, double left, double right)
     _impl = std::make_unique<_cimpl>(*this, left, right);
 }
 
+game::Slider::Slider(const Slider& op) :
+    GuiObject(op) 
+{
+    _impl = std::make_unique<_cimpl>(*this, op._impl->leftBorder,
+                                     op._impl->rightBorder);
+    *_impl = *op._impl;
+    _impl->_moveDrawable();
+}
+
+game::Slider &game::Slider::operator=(const game::Slider& op)
+{
+    dynamic_cast<GuiObject &>(*this) = op;
+    *_impl = *op._impl;
+    _impl->_moveDrawable();
+    return *this;
+}
+
 game::Slider::Slider(Slider &&op) noexcept
     : GuiObject(op._width, op._height), _impl(nullptr)
 {
     if (op._impl)
     {
+        dynamic_cast<GuiObject &>(*this) = std::move(op);
         _impl = std::move(op._impl);
-        _height = op._height;
-        _width = op._width;
-        _x = op._x;
-        _y = op._y;
-        op._height = 0;
-        op._width = 0;
-        op._x = 0;
-        op._y = 0;
-        op._impl = nullptr;
     }
 }
 
@@ -114,16 +141,8 @@ game::Slider &game::Slider::operator=(Slider &&op) noexcept
 {
     if (&op != this && op._impl != nullptr)
     {
+        dynamic_cast<GuiObject &>(*this) = std::move(op);
         _impl = std::move(op._impl);
-        _height = op._height;
-        _width = op._width;
-        _x = op._x;
-        _y = op._y;
-        op._height = 0;
-        op._width = 0;
-        op._x = 0;
-        op._y = 0;
-        op._impl = nullptr;
     }
     return *this;
 }
@@ -140,12 +159,9 @@ std::unique_ptr<game::GuiObject> game::Slider::clone() const
 {
     auto t = std::make_unique<game::Slider>(_width, _height, _impl->leftBorder,
                                             _impl->rightBorder);
-    t->_impl->invokingFunc = _impl->invokingFunc;
-    t->_impl->lsColor = _impl->lsColor;
-    t->_impl->rsColor = _impl->rsColor;
-    t->_impl->swColor = _impl->swColor;
-    t->_impl->outlineColor = _impl->outlineColor;
-    t->_impl->borderThickness = _impl->borderThickness;
+    *t = *this;
+    t->_impl->_moveDrawable();
+
     return t;
 }
 

@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <iostream>
 
 class game::GridPacker::_cimpl
 {
@@ -131,6 +132,7 @@ class game::GridPacker::_cimpl
             _base._data[i.idx]->_resize(width, height);
             _base._data[i.idx]->_setPos(_mapPosX[i.col] + offset_x,
                                         _mapPosY[i.row] + offset_y);
+
         }
     }
 };

@@ -14,10 +14,9 @@ class Slider : public GuiObject
 
     public:
         Slider(uint64_t width, uint64_t height, double left, double right);
-        // В будущем мб будет это все реализовано, но мне лень пока
-        Slider(const Slider &op) = delete;
+        Slider(const Slider &op);
         Slider(Slider &&op) noexcept;
-        Slider &operator=(const Slider &op) = delete;
+        Slider &operator=(const Slider &op);
         Slider &operator=(Slider &&op) noexcept;
 
         void show(sf::RenderWindow &r) override;
