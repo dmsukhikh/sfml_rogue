@@ -14,6 +14,7 @@ game::Game::Game()
     _curWin.setKeyRepeatEnabled(false);
     gamer.setPos(200, 200);
     _setMenusWindows();
+    mapManager.generateNewLevel();
 }
 
 void game::Game::_setGreetingWindow()
@@ -73,14 +74,14 @@ void game::Game::_setSettingsWindow()
         curSens(10, 50, _cursens);
 
     volume.setFunc(
-        [&volume, this](double scale)
+        [volume, this](double scale)
         {
             _curvolume =
                 std::to_string(static_cast<int>(volume.getBorders().y * scale));
         });
 
     sens.setFunc(
-        [&sens, this](double scale)
+        [sens, this](double scale)
         {
             _cursens =
                 std::to_string(static_cast<int>(sens.getBorders().y * scale));
@@ -159,10 +160,9 @@ void game::Game::_gameloop()
 {
     auto delta = _frameClock.restart().asSeconds();
 
-    _showObjects();
-    _inputHandling();
     _ingameHandling(delta);
-
+    _inputHandling();
+    _showObjects();
 }
 
 
@@ -235,6 +235,10 @@ void game::Game::_showObjects()
 {
     _curWin.clear(sf::Color::Black);
     gamer.show(_curWin);
+    for (const auto &i: mapManager.getLevel(room)._data)
+    {
+        i->show(_curWin);
+    }
     _guiScreens[_showingWindowIdx].show(_curWin);
     _curWin.display();
 }
@@ -242,4 +246,21 @@ void game::Game::_showObjects()
 void game::Game::_ingameHandling(float delta)
 {
     gamer.move(delta);
+    // Столкновения с объектами карты
+    for (auto &&i: mapManager.getLevel(room)._data)
+    {
+        if (gamer.collide(*i))
+        {
+            switch (i->getType())
+            {
+                case game::EntityType::Wall:
+                    gamer.stopFrom(*i, delta);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
 }
+

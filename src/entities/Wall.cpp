@@ -1,9 +1,11 @@
 #include "../../include/entities/Tiles.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <memory>
 
-game::Wall::Wall(float x, float y) : Entity(x, y)
+game::Wall::Wall(float x, float y) : Entity(x, y) 
 {
+    type = game::EntityType::Wall;
     _outputShape.setSize({game::Entity::BLOCK_SIZE, game::Entity::BLOCK_SIZE});
     _outputShape.setFillColor(sf::Color::White);
     _outputShape.setPosition(_x, _y);
@@ -29,4 +31,9 @@ bool game::Wall::collide(const Entity &op) const
         out = out || _outputShape.getGlobalBounds().intersects(i); 
     }
     return out;
+}
+
+std::unique_ptr<game::Entity> game::Wall::copy() const
+{
+    return std::make_unique<Wall>(*this);
 }

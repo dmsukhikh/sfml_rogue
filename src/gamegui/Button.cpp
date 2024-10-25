@@ -38,7 +38,7 @@ class game::Button::_cimpl
         {
             // Указываем путь, как будто мы пишем в main.cpp
             // Наверное, так хардкодить нельзя. But I don't care
-            _f.loadFromFile("../resources/ThaleahFat.ttf");
+            _f.loadFromFile("resources/ThaleahFat.ttf");
             _isFontInit = true;
         }
 

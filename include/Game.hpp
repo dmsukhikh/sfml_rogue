@@ -2,6 +2,7 @@
 #include "gamegui/GameGUI.hpp"
 #include "Settings.hpp"
 #include "entities/Entities.hpp"
+#include "MapManager.hpp"
 #include <vector>
 
 namespace game
@@ -21,6 +22,8 @@ class Game
          _keyMoveDownIsPressed = false;
 
     Gamer gamer;
+    MapManager mapManager;
+    uint32_t level = 0, room = 0;
     sf::Clock _frameClock;
 
 

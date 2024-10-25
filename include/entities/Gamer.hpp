@@ -1,6 +1,7 @@
 #include "Entity.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <cstdint>
+#include <memory>
 
 namespace game
 {
@@ -13,6 +14,7 @@ class Gamer : public Entity
 
 
     uint16_t _hp = 5;
+    float _prevrotation = 0;
     sf::Vector2f _speed = {0, 0};
     sf::Vector2f _view;
     sf::ConvexShape _sprite;
@@ -29,7 +31,8 @@ class Gamer : public Entity
     
     void rotate(float x, float y);
     void move(float delta);
+    void stopFrom(const Entity &i, float delta);
     void setPos(float x, float y);
-
+    std::unique_ptr<Entity> copy() const override;
 };
 }

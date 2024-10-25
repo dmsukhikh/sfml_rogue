@@ -18,11 +18,13 @@ add_library(gamegui src/gamegui/GuiObject.cpp
                     src/gamegui/Label.cpp)
 
 add_library(base src/Game.cpp
-                 src/Settings.cpp)
+                 src/Settings.cpp
+                 src/MapManager.cpp)
 
 add_library(entities src/entities/Entity.cpp
                      src/entities/Wall.cpp
-                     src/entities/Gamer.cpp)
+                     src/entities/Gamer.cpp
+                     src/entities/Floor.cpp)
 
 add_library(vecmath src/vecmath.cpp)
 

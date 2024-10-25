@@ -3,10 +3,10 @@
 
 game::Settings::Settings()
 {
-    std::fstream file("settings.txt", std::ios_base::in);
+    std::fstream file("resources/settings.txt", std::ios_base::in);
     if (file.fail())
     {
-        file.open("settings.txt", std::ios_base::in | std::ios_base::out |
+        file.open("resources/settings.txt", std::ios_base::in | std::ios_base::out |
                                       std::ios_base::trunc);
         _writeDefaultToFile(file);
     }
@@ -26,7 +26,7 @@ game::Settings::Settings()
 
 game::Settings::~Settings()
 {
-    std::fstream f("settings.txt",
+    std::fstream f("resources/settings.txt",
                       std::ios_base::out | std::ios_base::trunc);
 
     f << "THIS IS SYSTEM FILE: DON'T CHANGE ANYTHING WITHING THIS FILE!" << std::endl;

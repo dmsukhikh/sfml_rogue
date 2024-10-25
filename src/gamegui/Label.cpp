@@ -22,7 +22,7 @@ public:
   {
       if (!_fontLoaded)
       {
-          _f.loadFromFile("../resources/ThaleahFat.ttf");
+          _f.loadFromFile("resources/ThaleahFat.ttf");
           _fontLoaded = true;
       }
       _outtxt.setFont(_f);
