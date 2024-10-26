@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <memory>
 
 namespace game
@@ -9,6 +10,7 @@ namespace game
 enum class EntityType
 {
     Wall,
+    Port,
     None
 };
 
@@ -29,5 +31,6 @@ class Entity
     virtual std::vector<sf::FloatRect> getHitboxes() const = 0;
     virtual bool collide(const Entity &op) const = 0;
     virtual std::unique_ptr<Entity> copy() const = 0;
+    sf::Vector2f getPos() const;
 };
 }

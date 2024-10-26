@@ -44,7 +44,6 @@ void game::Gamer::rotate(float x, float y)
     sf::Vector2f view = sf::Vector2f(x, y) - _sprite.getPosition(),
                  basis = {0, -1};
 
-    _prevrotation = _sprite.getRotation();
     _sprite.setRotation(vdeg(basis, view));
     // Запоминаем координаты мыши, чтобы менять взгляд не только при
     // передвижении мыши, но и при движении игрока
@@ -91,10 +90,16 @@ std::unique_ptr<game::Entity> game::Gamer::copy() const
     return std::make_unique<game::Gamer>(*this);
 }
 
-void game::Gamer::stopFrom(const Entity& another, float delta)
+void game::Gamer::stop(float delta, sf::Vector2f def)
 {
+    if (_speed == sf::Vector2f{0, 0})
+    {
+        _speed = {sgn(def.x)*1.f, sgn(def.y)*1.f};
+    }
     // delta для мощного отбрасывания игрока назад
-    _speed = -_speed;
+    _speed = static_cast<float>(-4)*_speed;
     _sprite.move(_speed*delta);
-    _speed = {0, 0};
+    _x = _sprite.getPosition().x;
+    _y = _sprite.getPosition().y;
 }
+

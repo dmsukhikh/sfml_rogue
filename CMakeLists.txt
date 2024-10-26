@@ -24,7 +24,8 @@ add_library(base src/Game.cpp
 add_library(entities src/entities/Entity.cpp
                      src/entities/Wall.cpp
                      src/entities/Gamer.cpp
-                     src/entities/Floor.cpp)
+                     src/entities/Floor.cpp
+                     src/entities/Port.cpp)
 
 add_library(vecmath src/vecmath.cpp)
 

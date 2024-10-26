@@ -4,12 +4,19 @@
 #include <vector>
 #include <memory>
 #include <random>
+#include <set>
 
 namespace game {
 struct Map
 {
     Map() = default;
     Map(const Map &op);
+
+    void removeUnlinkedPorts();
+    void linkPort(uint64_t idx);
+
+    uint64_t width, height;
+    std::set<std::size_t> _unlinkedPorts, _linkedPorts;
     std::vector<std::unique_ptr<Entity>> _data;
 };
 
@@ -27,7 +34,7 @@ class MapManager
   public:
     MapManager();
     void generateNewLevel();
-    const Map& getLevel(uint32_t idx);
+    const Map& getRoom(uint32_t idx);
 };
 
 }

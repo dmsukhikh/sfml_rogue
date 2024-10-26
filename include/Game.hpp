@@ -25,7 +25,9 @@ class Game
     MapManager mapManager;
     uint32_t level = 0, room = 0;
     sf::Clock _frameClock;
+    sf::View cam;
 
+    float _testPortsCounter = 0;
 
     void _setMenusWindows();
     void _setSettingsWindow();
@@ -36,6 +38,8 @@ class Game
     void _inputHandling();
     void _ingameHandling(float delta);
     void _showObjects();
+    void _moveCamera();
+    void _activatePorts();
 
   public:
     Game();

@@ -1,7 +1,9 @@
 #include "../include/Game.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
+#include <iostream>
 
 using Anchor = game::GridPacker::Anchor;
 
@@ -12,6 +14,9 @@ game::Game::Game()
         "SFML: Rogue");
     _curWin.setFramerateLimit(75);
     _curWin.setKeyRepeatEnabled(false);
+    cam.setSize({_settings.screenSize.first*1.f, _settings.screenSize.second*1.f});
+    cam.setCenter({_settings.screenSize.first*0.5f, _settings.screenSize.second*0.5f});
+    _curWin.setView(cam);
     gamer.setPos(200, 200);
     _setMenusWindows();
     mapManager.generateNewLevel();
@@ -235,10 +240,11 @@ void game::Game::_showObjects()
 {
     _curWin.clear(sf::Color::Black);
     gamer.show(_curWin);
-    for (const auto &i: mapManager.getLevel(room)._data)
+    for (const auto &i: mapManager.getRoom(room)._data)
     {
         i->show(_curWin);
     }
+    _moveCamera();
     _guiScreens[_showingWindowIdx].show(_curWin);
     _curWin.display();
 }
@@ -247,20 +253,50 @@ void game::Game::_ingameHandling(float delta)
 {
     gamer.move(delta);
     // Столкновения с объектами карты
-    for (auto &&i: mapManager.getLevel(room)._data)
+    for (auto &&i: mapManager.getRoom(room)._data)
     {
         if (gamer.collide(*i))
         {
             switch (i->getType())
             {
                 case game::EntityType::Wall:
-                    gamer.stopFrom(*i, delta);
+                    gamer.stop(delta, i->getPos() - gamer.getPos());
                     break;
+
+                case game::EntityType::Port:
+                    _curWin.clear();
+                    gamer.setPos(Entity::BLOCK_SIZE*3, Entity::BLOCK_SIZE*3);
+                    room = reinterpret_cast<Port &>(*i).getIdx();
+                    _testPortsCounter = 0;
+                    std::cout << room << std::endl;
 
                 default:
                     break;
             }
         }
     }
+    _activatePorts();
 }
 
+void game::Game::_moveCamera()
+{
+    sf::Vector2f newview = gamer.getPos();
+    newview.x = std::max(_settings.screenSize.first/2.f, newview.x);
+    newview.x = std::min(newview.x, mapManager.getRoom(room).width -
+                                        _settings.screenSize.first / 2.f);
+
+    newview.y = std::max(_settings.screenSize.second/2.f, newview.y);
+    newview.y = std::min(newview.y, mapManager.getRoom(room).height -
+                                        _settings.screenSize.second / 2.f);
+    cam.setCenter(newview);
+    _curWin.setView(cam);
+}
+
+void game::Game::_activatePorts()
+{
+    auto &rm = mapManager.getRoom(room);
+    for (auto &idx: rm._linkedPorts)
+    {
+        reinterpret_cast<Port &>(*rm._data[idx]).changeActiveness(true);
+    }
+}
