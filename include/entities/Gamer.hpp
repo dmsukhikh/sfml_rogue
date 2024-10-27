@@ -1,26 +1,14 @@
-#include "Entity.hpp"
+#include "Movable.hpp"
 #include <SFML/System/Vector2.hpp>
-#include <cstdint>
 #include <memory>
 
 namespace game
 {
-class Gamer : public Entity
+class Gamer : public Movable
 {
-    const float _SIZE = 50;
-    float _MAXSPEEDABS = 200;
-    float _ACCABS = 1500;
-    float _SLOWDOWNABS = 300;
-
-
-    uint16_t _hp = 5;
-    sf::Vector2f _speed = {0, 0};
-    sf::Vector2f _view;
     sf::ConvexShape _sprite;
 
   public:
-    int _xmovement = 0, _ymovement = 0;
-
     Gamer(float x, float y);
     Gamer();
 
@@ -29,9 +17,9 @@ class Gamer : public Entity
     bool collide(const Entity &op) const override;
     
     void rotate(float x, float y);
-    void move(float delta);
-    void stop(float delta, sf::Vector2f def);
-    void setPos(float x, float y);
+    void move(float delta) override;
+    void stop(float delta, sf::Vector2f def) override;
+    void setPos(float x, float y) override;
     std::unique_ptr<Entity> copy() const override;
 };
 }

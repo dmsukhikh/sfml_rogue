@@ -3,7 +3,9 @@
 #include "Settings.hpp"
 #include "entities/Entities.hpp"
 #include "MapManager.hpp"
+#include <SFML/System/Vector2.hpp>
 #include <vector>
+#include <list>
 
 namespace game
 {
@@ -23,11 +25,12 @@ class Game
 
     Gamer gamer;
     MapManager mapManager;
+    std::list<std::unique_ptr<Movable>> onMapEntities;
+
     uint32_t level = 0, room = 0;
     sf::Clock _frameClock;
     sf::View cam;
-
-    float _testPortsCounter = 0;
+    sf::Vector2i _view = {0, 0};
 
     void _setMenusWindows();
     void _setSettingsWindow();

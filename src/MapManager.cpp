@@ -106,8 +106,12 @@ void game::MapManager::generateNewLevel()
     {
         if (level[i]._unlinkedPorts.empty()) continue;
 
+        // Случайный выбор комнаты из связной части
         auto rand = std::uniform_int_distribution<size_t>(0, i-1); 
         size_t tolink = rand(_gen);
+
+        // ! В связной части не должно быть так, чтобы все порталы были заполнены.
+        // ! Поэтому важно, чтобы в каждой новой карте было минимум два телепорта
         for (;level[tolink]._unlinkedPorts.empty(); tolink = rand(_gen));
         level[tolink].linkPort(i);
         level[i].linkPort(tolink);

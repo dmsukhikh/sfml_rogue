@@ -3,7 +3,10 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
+#include "../include/vecmath.hpp"
 #include <iostream>
+#include <algorithm>
+#include <memory>
 
 using Anchor = game::GridPacker::Anchor;
 
@@ -165,8 +168,8 @@ void game::Game::_gameloop()
 {
     auto delta = _frameClock.restart().asSeconds();
 
-    _ingameHandling(delta);
     _inputHandling();
+    _ingameHandling(delta);
     _showObjects();
 }
 
@@ -226,12 +229,24 @@ void game::Game::_inputHandling()
                 _keyMoveDownIsPressed = false;
                 gamer._ymovement = _keyMoveUpIsPressed ? -1 : 0;
             }
+            else if (ev.key.code == sf::Keyboard::Space)
+            {
+                onMapEntities.push_back(std::make_unique<Shot>(
+                    gamer.getPos().x +
+                        cos((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30),
+                    gamer.getPos().y +
+                        sin((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30)));
+
+                auto it = onMapEntities.rbegin();
+                auto t = _curWin.mapPixelToCoords(_view);
+                (*it)->rotate(gamer.getAngle()-90);
+                (*it)->setGamerState(true);
+            }
         }
 
         if (ev.type == sf::Event::MouseMoved)
         {
-            auto t = _curWin.mapPixelToCoords({ev.mouseMove.x, ev.mouseMove.y});
-            gamer.rotate(t.x, t.y);
+            _view = {ev.mouseMove.x, ev.mouseMove.y};
         }
     }
 }
@@ -244,6 +259,10 @@ void game::Game::_showObjects()
     {
         i->show(_curWin);
     }
+    for (const auto &i: onMapEntities)
+    {
+        i->show(_curWin);
+    }
     _moveCamera();
     _guiScreens[_showingWindowIdx].show(_curWin);
     _curWin.display();
@@ -251,10 +270,17 @@ void game::Game::_showObjects()
 
 void game::Game::_ingameHandling(float delta)
 {
+    auto t = _curWin.mapPixelToCoords(_view);
     gamer.move(delta);
-    // Столкновения с объектами карты
+    gamer.rotate(t.x, t.y);
+    for (auto &&i: onMapEntities)
+    {
+        i->move(delta);
+    }
+
     for (auto &&i: mapManager.getRoom(room)._data)
     {
+        // Столкновения игрока с тайлами карты
         if (gamer.collide(*i))
         {
             switch (i->getType())
@@ -267,15 +293,41 @@ void game::Game::_ingameHandling(float delta)
                     _curWin.clear();
                     gamer.setPos(Entity::BLOCK_SIZE*3, Entity::BLOCK_SIZE*3);
                     room = reinterpret_cast<Port &>(*i).getIdx();
-                    _testPortsCounter = 0;
                     std::cout << room << std::endl;
 
                 default:
                     break;
             }
         }
+
+        // Столкновения сущностей с тайлами карты
+        for (auto &&obj : onMapEntities)
+        {
+            obj->collideHandling(*i);
+        }
     }
-    _activatePorts();
+
+    for (auto &&i : onMapEntities)
+    {
+        if (i->collide(gamer))
+        {
+            i->collideHandling(gamer);
+        }
+
+        for (auto &&j : onMapEntities)
+        {
+            if (i->collide(*j) && &j != &i)
+            {
+                i->collideHandling(*j);
+            }
+        }
+    }
+
+    auto it = std::remove_if(onMapEntities.begin(), onMapEntities.end(), 
+            [](std::unique_ptr<Movable> &i){ return !i->isExisted; });
+    onMapEntities.erase(it, onMapEntities.end());
+    std::cout << onMapEntities.size() << std::endl;
+    std::cout.clear();
 }
 
 void game::Game::_moveCamera()

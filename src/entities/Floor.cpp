@@ -1,7 +1,10 @@
 #include "../../include/entities/Tiles.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 
-game::Floor::Floor(float x, float y) : Entity(x, y) {}
+game::Floor::Floor(float x, float y) : Entity(x, y) 
+{
+    type = EntityType::None;
+}
 game::Floor::Floor() : game::Floor(0, 0) {}
 
 void game::Floor::show(sf::RenderWindow &sf) const {}
