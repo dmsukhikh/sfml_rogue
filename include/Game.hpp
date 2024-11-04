@@ -43,6 +43,8 @@ class Game
     void _showObjects();
     void _moveCamera();
     void _activatePorts();
+    void _generateEnemies();
+    void _initializeRoom(size_t room);
 
   public:
     Game();

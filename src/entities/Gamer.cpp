@@ -41,10 +41,7 @@ bool game::Gamer::collide(const Entity &op) const
 
 void game::Gamer::rotate(float x, float y)
 {
-    sf::Vector2f view = sf::Vector2f(x, y) - getPos(),
-                 basis = {0, -1};
-
-    _angle = vdeg(basis, view);
+    game::Movable::rotate(x, y);
     _sprite.setRotation(_angle);
 }
 

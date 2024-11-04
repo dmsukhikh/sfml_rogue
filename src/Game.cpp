@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <memory>
+#include <random>
 
 using Anchor = game::GridPacker::Anchor;
 
@@ -137,6 +138,9 @@ void game::Game::_setMenusWindows()
 void game::Game::mainloop()
 {
     sf::Event ev;
+
+    _initializeRoom(0);
+
     while (_curWin.isOpen())
     {
         _curWin.clear(_settings.bgcol);
@@ -171,6 +175,7 @@ void game::Game::_gameloop()
     _inputHandling();
     _ingameHandling(delta);
     _showObjects();
+    std::cout << 1 / delta << std::endl;
 }
 
 
@@ -204,6 +209,10 @@ void game::Game::_inputHandling()
             {
                 _keyMoveDownIsPressed = true;
                 gamer._ymovement = 10;
+            }
+            else if (ev.key.code == sf::Keyboard::H)
+            {
+                _activatePorts();
             }
         }
         
@@ -259,10 +268,12 @@ void game::Game::_showObjects()
     {
         i->show(_curWin);
     }
+
     for (const auto &i: onMapEntities)
     {
         i->show(_curWin);
     }
+
     _moveCamera();
     _guiScreens[_showingWindowIdx].show(_curWin);
     _curWin.display();
@@ -273,6 +284,17 @@ void game::Game::_ingameHandling(float delta)
     auto t = _curWin.mapPixelToCoords(_view);
     gamer.move(delta);
     gamer.rotate(t.x, t.y);
+    // Искуственный интеллект
+    for (auto &obj: onMapEntities)
+    {
+        if (obj->getType() == EntityType::Enemy)
+        {
+            auto &enemy = reinterpret_cast<game::AbstractEnemy &>(*obj);
+            enemy.rotate(gamer.getPos().x, gamer.getPos().y);
+            enemy.findPathToPlayer(gamer.getPos().x, gamer.getPos().y);
+        }
+    }
+
     for (auto &&i: onMapEntities)
     {
         i->move(delta);
@@ -290,9 +312,7 @@ void game::Game::_ingameHandling(float delta)
                     break;
 
                 case game::EntityType::Port:
-                    _curWin.clear();
-                    gamer.setPos(Entity::BLOCK_SIZE*3, Entity::BLOCK_SIZE*3);
-                    room = reinterpret_cast<Port &>(*i).getIdx();
+                    _initializeRoom(reinterpret_cast<Port &>(*i).getIdx());
                     std::cout << room << std::endl;
 
                 default:
@@ -307,18 +327,17 @@ void game::Game::_ingameHandling(float delta)
         }
     }
 
-    for (auto &&i : onMapEntities)
+    for (auto it = onMapEntities.begin(); it != onMapEntities.end(); it++)
     {
-        if (i->collide(gamer))
+        if ((*it)->collide(gamer))
         {
-            i->collideHandling(gamer);
+            (*it)->collideHandling(gamer);
         }
-
-        for (auto &&j : onMapEntities)
+        for (auto j = it; j != onMapEntities.end(); ++j)
         {
-            if (i->collide(*j) && &j != &i)
+            if ((*it)->collide(*(*j)) && j != it)
             {
-                i->collideHandling(*j);
+                (*it)->collideHandling(*(*j));
             }
         }
     }
@@ -326,8 +345,6 @@ void game::Game::_ingameHandling(float delta)
     auto it = std::remove_if(onMapEntities.begin(), onMapEntities.end(), 
             [](std::unique_ptr<Movable> &i){ return !i->isExisted; });
     onMapEntities.erase(it, onMapEntities.end());
-    std::cout << onMapEntities.size() << std::endl;
-    std::cout.clear();
 }
 
 void game::Game::_moveCamera()
@@ -350,5 +367,39 @@ void game::Game::_activatePorts()
     for (auto &idx: rm._linkedPorts)
     {
         reinterpret_cast<Port &>(*rm._data[idx]).changeActiveness(true);
+    }
+}
+
+void game::Game::_generateEnemies()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> randTile(
+        0, mapManager.getRoom(room)._data.size()-1);
+    for (int i = 0; i < 3; ++i)
+    {
+        auto idx = 0;
+        do
+        {
+            idx = randTile(gen);
+        } while (mapManager.getRoom(room)._data[idx]->getType() !=
+                 EntityType::None);
+        auto pos = mapManager.getRoom(room)._data[idx]->getPos();
+
+        auto j = std::make_unique<Striker>(pos.x, pos.y);
+        onMapEntities.push_back(std::move(j));
+    }
+}
+
+void game::Game::_initializeRoom(size_t i)
+{
+    _curWin.clear();
+    room = i;
+    AbstractEnemy::setGraph(mapManager.getRoom(room));
+    onMapEntities.clear();
+    gamer.setPos(Entity::BLOCK_SIZE*3, Entity::BLOCK_SIZE*3);
+    if (!mapManager.getRoom(room).isCleared)
+    {
+        _generateEnemies();
     }
 }

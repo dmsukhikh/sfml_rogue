@@ -89,6 +89,12 @@ void game::Shot::collideHandling(Movable &op)
             }
             break;
 
+        case game::EntityType::Enemy:
+            op.decreaseHp(1);
+            if (op.getHp() == 0) op.isExisted = false;
+            isExisted = false;
+            break;
+
         default:
             break;
         }

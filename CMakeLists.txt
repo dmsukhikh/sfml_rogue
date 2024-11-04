@@ -27,7 +27,9 @@ add_library(entities src/entities/Entity.cpp
                      src/entities/Floor.cpp
                      src/entities/Port.cpp
                      src/entities/Movable.cpp
-                     src/entities/Bullets.cpp)
+                     src/entities/Bullets.cpp
+                     src/entities/AbstractEnemy.cpp
+                     src/entities/Striker.cpp)
 
 add_library(vecmath src/vecmath.cpp)
 

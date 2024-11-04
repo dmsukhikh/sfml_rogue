@@ -17,6 +17,8 @@ game::Map::Map(const Map &op)
     }
     _unlinkedPorts = op._unlinkedPorts;
     _linkedPorts = op._linkedPorts;
+    _adjList = op._adjList;
+    _mapCoords = op._mapCoords;
     width = op.width;
     height = op.height;
 } 
@@ -42,6 +44,7 @@ void game::Map::linkPort(uint64_t idx)
         // Мы знаем, что по индексу port доступен объект game::Port, поэтому
         // можно произвести reinterpret_cast. Господи, прости меня за это. Но
         // я знаю, что я делаю
+
         auto i = _unlinkedPorts.begin();
         reinterpret_cast<Port &>(*_data[*i]).setIdx(idx);
         _linkedPorts.insert(*i);
@@ -56,35 +59,64 @@ game::MapManager::MapManager() : _gen(_rd())
     {
         std::fstream mapFile(map.path(), std::ios_base::in);
         Map tempmap;
-        float x = 0, y = 0, maxx = 0;
+        int x = 0, y = 0, maxx = 0, idx = 0, prevrow = 0, praccum = 0;
         while (!mapFile.eof())
         {
             for (char c = mapFile.get(); c != '\n' && !mapFile.eof(); c = mapFile.get())
             {
+                tempmap._adjList.push_back({});
                 switch (c)
                 {
                     case 'X':
-                        tempmap._data.push_back(std::make_unique<game::Wall>(x, y));
+                        tempmap._data.push_back(std::make_unique<game::Wall>(
+                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
                         break;
                     case '.':
-                        tempmap._data.push_back(std::make_unique<game::Floor>(x, y));
+                        tempmap._data.push_back(std::make_unique<game::Floor>(
+                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
                         break;
                     case 'P':
-                        tempmap._data.push_back(std::make_unique<game::Port>(x, y));
+                        tempmap._data.push_back(std::make_unique<game::Port>(
+                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
                         tempmap._unlinkedPorts.insert(tempmap._data.size() - 1);
                         break;
                     default:
-                        tempmap._data.push_back(std::make_unique<game::Floor>(x, y));
+                        tempmap._data.push_back(std::make_unique<game::Floor>(
+                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
                         break;
                 }
-                x += game::Entity::BLOCK_SIZE;
+
+                tempmap._mapCoords.push_back({Entity::BLOCK_SIZE * (x + 0.5f),
+                                              Entity::BLOCK_SIZE * (y + 0.5f)});
+
+                if (x > 0 &&
+                    tempmap._data[idx]->getType() == EntityType::None &&
+                    tempmap._data[idx - 1]->getType() == EntityType::None)
+                {
+                    tempmap._adjList[idx].push_back(idx - 1);
+                    tempmap._adjList[idx - 1].push_back(idx);
+                }
+
+                if (y > 0 && idx-praccum < prevrow &&
+                    tempmap._data[idx]->getType() == EntityType::None &&
+                    tempmap._data[idx-prevrow]->getType() == EntityType::None)
+                {
+                    tempmap._adjList[idx].push_back(idx - prevrow);
+                    tempmap._adjList[idx - prevrow].push_back(idx);
+                }
+
+                x += 1;
+                idx += 1;
             }
             maxx = std::max(maxx, x);
+            prevrow = x;
+            praccum += x;
             x = 0;
-            y += game::Entity::BLOCK_SIZE;
+            y += 1;
         }
-        tempmap.width = maxx;
-        tempmap.height = y;
+
+        tempmap.width = maxx * Entity::BLOCK_SIZE;
+        tempmap.height = y * Entity::BLOCK_SIZE;
         pool.push_back(std::move(tempmap));
     }
     _randmap = std::uniform_int_distribution<int>(0, pool.size()-1);

@@ -1,12 +1,14 @@
 #pragma once
-#include "entities/Entities.hpp"
+#include <SFML/System/Vector2.hpp>
 #include <cstdint>
 #include <vector>
 #include <memory>
 #include <random>
 #include <set>
+#include "entities/Entities.hpp"
 
 namespace game {
+
 struct Map
 {
     Map() = default;
@@ -14,9 +16,12 @@ struct Map
 
     void removeUnlinkedPorts();
     void linkPort(uint64_t idx);
+    bool isCleared = false;
 
     uint64_t width, height;
     std::set<std::size_t> _unlinkedPorts, _linkedPorts;
+    std::vector<std::vector<int>> _adjList;
+    std::vector<sf::Vector2f> _mapCoords;
     std::vector<std::unique_ptr<Entity>> _data;
 };
 

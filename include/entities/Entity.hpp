@@ -20,6 +20,7 @@ enum class EntityType
     Port,
     Shot,
     Gamer,
+    Enemy,
     None
 };
 

@@ -1,10 +1,19 @@
 #include "../../include/entities/Movable.hpp"
 #include "../../include/vecmath.hpp"
+#include <SFML/System/Vector2.hpp>
 #include <cmath>
 #include <cstdint>
 
 game::Movable::Movable(float x, float y) : Entity(x, y) {}
 game::Movable::Movable() : game::Movable(0, 0) {}
+
+void game::Movable::rotate(float x, float y)
+{
+    sf::Vector2f view = sf::Vector2f(x, y) - getPos(),
+                 basis = {0, -1};
+
+    _angle = vdeg(basis, view);
+}
 
 void game::Movable::rotate(float angle)
 {
@@ -46,12 +55,12 @@ void game::Movable::setPos(float x, float y)
 
 void game::Movable::stop(float delta, sf::Vector2f def)
 {
-    if (_speed == sf::Vector2f{0, 0})
+    if (vabs(_speed) < 10)
     {
-        _speed = {sgn(def.x)*1.f, sgn(def.y)*1.f};
+        _speed = {-sgn(def.x)*20.f, -sgn(def.y)*20.f};
     }
     // delta для мощного отбрасывания игрока назад
-    _speed = static_cast<float>(-4)*_speed;
+    _speed = static_cast<float>(-1.5)*_speed;
     _x += _speed.x*delta;
     _y += _speed.y*delta;
 }
@@ -74,5 +83,10 @@ float game::Movable::getAngle() const
 void game::Movable::setGamerState(bool i)
 {
     _isGamerEntity = true;
+}
+
+uint16_t game::Movable::getHp() const
+{
+    return _hp;
 }
 
