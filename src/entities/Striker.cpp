@@ -1,11 +1,16 @@
 #include "../../include/entities/Striker.hpp"
+#include "../../include/entities/Bullets.hpp"
 #include "../../include/vecmath.hpp"
+#include <SFML/System/Vector2.hpp>
 #include <cstdlib>
-#include <iostream>
 #include <memory>
 #include <cmath>
+#include <random>
 
-game::Striker::Striker(float x, float y) : AbstractEnemy(x, y) 
+std::random_device game::Striker::seed{};
+
+game::Striker::Striker(float x, float y) : AbstractEnemy(x, y), gen(seed()),
+    randShotCD(0, 1)
 {
     _sprite.setSize({BLOCK_SIZE, BLOCK_SIZE}); 
     _sprite.setFillColor({255, 190, 190});
@@ -69,13 +74,6 @@ void game::Striker::move(float delta)
     game::Movable::move(delta);
     _sprite.move(_speed * delta);
     _hitbox.move(_speed * delta);
-    system("clear");
-    std::cout << "speed_x: " << _speed.x << std::endl;
-    std::cout << "speed_y: " << _speed.y << std::endl;
-    std::cout << "pos_x(in field): " << _x << std::endl;
-    std::cout << "pos_y(in field): " << _y << std::endl;
-    std::cout << "pos_x(act): " << _hitbox.getPosition().x << std::endl;
-    std::cout << "pos_y(act): " << _hitbox.getPosition().y << std::endl;
 }
 
 void game::Striker::setPos(float x, float y)
@@ -91,4 +89,32 @@ void game::Striker::stop(float delta, sf::Vector2f def)
     game::Movable::stop(delta, def);
     _sprite.move(_speed*delta);
     _hitbox.move(_speed * delta);
+}
+
+std::optional<std::unique_ptr<game::Movable>> game::Striker::shot(float delta)
+{
+    if (shotCD >= 1 + addshotCD)
+    {
+        shotCD = 0;
+        addshotCD = randShotCD(gen);
+        auto it = std::make_unique<game::Shot>(getPos().x, getPos().y);
+        it->masterType = EntityType::Enemy;
+        it->rotate(_angle+270);
+        return it;
+    }
+    shotCD += delta; 
+    return std::nullopt;
+}
+
+void game::Striker::processMoving(sf::Vector2f gamerPos)
+{
+    if (fabs(gamerPos.x - getPos().x) >= screenSize.x*0.35 ||  
+        fabs(gamerPos.y - getPos().y) >= screenSize.y*0.35)
+    {
+        findPathToPoint(gamerPos.x, gamerPos.y);
+    }
+    else
+    {
+        findPathToPoint(panicPoint.x, panicPoint.y);
+    }
 }

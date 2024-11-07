@@ -18,17 +18,16 @@ class Movable : public Entity
     float _angle = 0;
     sf::Vector2f _speed = {0, 0};
     uint16_t _hp = 5;
-    bool _isGamerEntity = false;
 
   public:
     int _xmovement = 0, _ymovement = 0;
     bool isExisted = true;
+    EntityType masterType = EntityType::None;
 
     Movable(float x, float y);
     Movable();
 
     void decreaseHp(uint16_t on);
-    void setGamerState(bool i);
     float getAngle() const;
     uint16_t getHp() const;
 

@@ -8,9 +8,9 @@ namespace game
 class Wall : public Entity
 {
 protected:
-  sf::RectangleShape _outputShape;
 
   public:
+  sf::RectangleShape _outputShape;
     Wall();
     Wall(float x, float y);
 

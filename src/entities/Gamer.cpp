@@ -1,4 +1,5 @@
 #include "../../include/entities/Gamer.hpp"
+#include "../../include/vecmath.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <cmath>
 #include <memory>
@@ -67,7 +68,18 @@ std::unique_ptr<game::Entity> game::Gamer::copy() const
 
 void game::Gamer::stop(float delta, sf::Vector2f def)
 {
-    game::Movable::stop(delta, def);
+    sf::Vector2f basis = {1, 0};
+    float c = vsin(basis, def);
+    if (fabs(c) < sqrt(2)/2 - 0.1)
+    {
+        setPos(getPos().x - sgn(def.x), getPos().y);
+        _speed.x = 0;
+    }
+    if (fabs(c) > sqrt(2)/2 + 0.1)
+    {
+        setPos(getPos().x, getPos().y - sgn(def.y));
+        _speed.y = 0;
+    }
     _sprite.move(_speed*delta);
     _hitbox.move(_speed*delta);
 }

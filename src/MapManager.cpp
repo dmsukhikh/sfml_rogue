@@ -60,6 +60,7 @@ game::MapManager::MapManager() : _gen(_rd())
         std::fstream mapFile(map.path(), std::ios_base::in);
         Map tempmap;
         int x = 0, y = 0, maxx = 0, idx = 0, prevrow = 0, praccum = 0;
+
         while (!mapFile.eof())
         {
             for (char c = mapFile.get(); c != '\n' && !mapFile.eof(); c = mapFile.get())
@@ -104,7 +105,7 @@ game::MapManager::MapManager() : _gen(_rd())
                     tempmap._adjList[idx].push_back(idx - prevrow);
                     tempmap._adjList[idx - prevrow].push_back(idx);
                 }
-
+                
                 x += 1;
                 idx += 1;
             }

@@ -25,6 +25,8 @@ game::Game::Game()
     _curWin.setView(cam);
     gamer.setPos(200, 200);
     _setMenusWindows();
+    game::AbstractEnemy::setScreenSize(sf::Vector2f{
+        1.f * _settings.screenSize.first, 1.f * _settings.screenSize.second});
     mapManager.generateNewLevel();
 }
 
@@ -250,7 +252,7 @@ void game::Game::_inputHandling()
                 auto it = onMapEntities.rbegin();
                 auto t = _curWin.mapPixelToCoords(_view);
                 (*it)->rotate(gamer.getAngle()-90);
-                (*it)->setGamerState(true);
+                (*it)->masterType = EntityType::Gamer;
             }
         }
 
@@ -346,9 +348,17 @@ void game::Game::_ingameHandling(float delta)
         {
             auto &enemy = reinterpret_cast<game::AbstractEnemy &>(*obj);
             enemy.rotate(gamer.getPos().x, gamer.getPos().y);
-            enemy.findPathToPlayer(gamer.getPos().x, gamer.getPos().y);
+            enemy.setPanicPoint(mapManager.getRoom(room)._data, gamer.getPos(),
+                                delta);
+            enemy.processMoving(gamer.getPos());
+            auto enshot = enemy.shot(delta);
+            if (enshot.has_value())
+            {
+                onMapEntities.push_back(std::move(enshot.value()));
+            }
         }
     }
+
     for (auto &&i: onMapEntities)
     {
         i->move(delta);
@@ -388,7 +398,7 @@ void game::Game::_generateEnemies()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> randTile(
         0, mapManager.getRoom(room)._data.size()-1);
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < 16; ++i)
     {
         auto idx = 0;
         do

@@ -1,12 +1,17 @@
 #pragma once
 #include "AbstractEnemy.hpp"
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <random>
 
 namespace game
 {
 class Striker : public AbstractEnemy
 {
     sf::RectangleShape _sprite, _hitbox;
+    static std::random_device seed;
+    std::mt19937 gen;
+    std::uniform_real_distribution<float> randShotCD;
+    float addshotCD;
 
   public:
     Striker(float x, float y);
@@ -23,5 +28,8 @@ class Striker : public AbstractEnemy
     void move(float delta) override;
     void stop(float delta, sf::Vector2f def) override;
     void setPos(float x, float y) override;
+
+    std::optional<std::unique_ptr<game::Movable>> shot(float delta) override;
+    void processMoving(sf::Vector2f gamerPos) override;
 };
 } // namespace game

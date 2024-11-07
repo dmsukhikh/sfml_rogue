@@ -82,7 +82,7 @@ void game::Shot::collideHandling(Movable &op)
         switch (op.getType())
         {
         case game::EntityType::Gamer:
-            if (!_isGamerEntity)
+            if (masterType != EntityType::Gamer)
             {
                 op.decreaseHp(1);
                 isExisted = false;
@@ -90,9 +90,13 @@ void game::Shot::collideHandling(Movable &op)
             break;
 
         case game::EntityType::Enemy:
-            op.decreaseHp(1);
-            if (op.getHp() == 0) op.isExisted = false;
-            isExisted = false;
+            if (masterType != EntityType::Enemy)
+            {
+                op.decreaseHp(1);
+                if (op.getHp() == 0)
+                    op.isExisted = false;
+                isExisted = false;
+            }
             break;
 
         default:

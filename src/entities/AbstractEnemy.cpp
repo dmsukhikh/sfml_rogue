@@ -2,11 +2,14 @@
 #include "../../include/MapManager.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <stdexcept>
+#include <iostream>
+#include <random>
 #include <queue>
 #include "../../include/vecmath.hpp"
 
 std::vector<std::vector<int>> game::AbstractEnemy::graph;
 std::vector<sf::Vector2f> game::AbstractEnemy::coordsData;
+sf::Vector2f game::AbstractEnemy::screenSize{0, 0};
 
 game::AbstractEnemy::AbstractEnemy(float x, float y) : Movable(x, y) 
 {
@@ -21,7 +24,7 @@ void game::AbstractEnemy::setGraph(const Map &map)
     coordsData = map._mapCoords;
 }
 
-void game::AbstractEnemy::findPathToPlayer(float dest_x, float dest_y)
+void game::AbstractEnemy::findPathToPoint(float dest_x, float dest_y)
 {
     // Весьма сложная в плане вычислений функция. Возможно, ее нужно будет
     // оптимизировать в будущем
@@ -98,18 +101,55 @@ void game::AbstractEnemy::collideHandling(Entity &op)
 
 void game::AbstractEnemy::collideHandling(Movable &op) 
 {
-    if (collide(op))
+    switch (op.getType())
     {
-        switch (op.getType())
-        {
-            case game::EntityType::Shot:
-                decreaseHp(1);
-                op.isExisted = false;
-                if (_hp == 0) isExisted = false;
-
-            default:
-                break;
-        }
+        case game::EntityType::Shot:
+            op.collideHandling(*this);
+        default:
+            break;
     }
 }
 
+void game::AbstractEnemy::setScreenSize(sf::Vector2f newSize)
+{
+    screenSize = newSize;
+}
+
+void game::AbstractEnemy::setPanicPoint(
+    const std::vector<std::unique_ptr<game::Entity>> &bob,
+    sf::Vector2f gamerPos, float delta)
+{
+    if ((fabs(gamerPos.x - getPos().x) < screenSize.x * 0.35 &&
+         fabs(gamerPos.y - getPos().y) < screenSize.y * 0.35) &&
+        panicCD > 5)
+    {
+        panicCD = 0;
+
+        std::random_device rd; 
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<size_t> rand_bob(0, bob.size()-1);
+        int tries = 0;
+        sf::Vector2f newPanic;
+
+        while (tries < 10)
+        {
+            size_t i = rand_bob(gen);
+            if (bob[i]->getType() != EntityType::None) continue;
+            else
+            {
+                newPanic = bob[i]->getPos();
+                auto diff = gamerPos - bob[i]->getPos();
+                if (fabs(diff.x) < screenSize.x * 0.35 && 
+                    fabs(diff.y) < screenSize.y * 0.35)
+                {
+                    ++tries;
+                    continue;
+                }
+                else break;
+            }
+        }
+        panicPoint = newPanic;
+        std::cout << newPanic.x << " " << newPanic.y << std::endl;
+    }
+    panicCD += delta;
+}
