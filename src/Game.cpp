@@ -1,4 +1,6 @@
 #include "../include/Game.hpp"
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -175,7 +177,6 @@ void game::Game::_gameloop()
     _inputHandling();
     _ingameHandling(delta);
     _showObjects();
-    std::cout << 1 / delta << std::endl;
 }
 
 
@@ -272,7 +273,19 @@ void game::Game::_showObjects()
     for (const auto &i: onMapEntities)
     {
         i->show(_curWin);
+        if (i->getType() == EntityType::Enemy)
+        {
+            auto j = reinterpret_cast<Striker &>(*i);
+            for (auto k : j.path)
+            {
+                sf::RectangleShape dot({3, 3}); 
+                dot.setFillColor(sf::Color::Red);
+                dot.setPosition(AbstractEnemy::coordsData[k]);
+                _curWin.draw(dot);
+            }
+        }
     }
+
 
     _moveCamera();
     _guiScreens[_showingWindowIdx].show(_curWin);
@@ -282,24 +295,6 @@ void game::Game::_showObjects()
 void game::Game::_ingameHandling(float delta)
 {
     auto t = _curWin.mapPixelToCoords(_view);
-    gamer.move(delta);
-    gamer.rotate(t.x, t.y);
-    // Искуственный интеллект
-    for (auto &obj: onMapEntities)
-    {
-        if (obj->getType() == EntityType::Enemy)
-        {
-            auto &enemy = reinterpret_cast<game::AbstractEnemy &>(*obj);
-            enemy.rotate(gamer.getPos().x, gamer.getPos().y);
-            enemy.findPathToPlayer(gamer.getPos().x, gamer.getPos().y);
-        }
-    }
-
-    for (auto &&i: onMapEntities)
-    {
-        i->move(delta);
-    }
-
     for (auto &&i: mapManager.getRoom(room)._data)
     {
         // Столкновения игрока с тайлами карты
@@ -342,6 +337,23 @@ void game::Game::_ingameHandling(float delta)
         }
     }
 
+    gamer.move(delta);
+    gamer.rotate(t.x, t.y);
+    // Искуственный интеллект
+    for (auto &obj: onMapEntities)
+    {
+        if (obj->getType() == EntityType::Enemy)
+        {
+            auto &enemy = reinterpret_cast<game::AbstractEnemy &>(*obj);
+            enemy.rotate(gamer.getPos().x, gamer.getPos().y);
+            enemy.findPathToPlayer(gamer.getPos().x, gamer.getPos().y);
+        }
+    }
+    for (auto &&i: onMapEntities)
+    {
+        i->move(delta);
+    }
+
     auto it = std::remove_if(onMapEntities.begin(), onMapEntities.end(), 
             [](std::unique_ptr<Movable> &i){ return !i->isExisted; });
     onMapEntities.erase(it, onMapEntities.end());
@@ -376,7 +388,7 @@ void game::Game::_generateEnemies()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> randTile(
         0, mapManager.getRoom(room)._data.size()-1);
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 1; ++i)
     {
         auto idx = 0;
         do

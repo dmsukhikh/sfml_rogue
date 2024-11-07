@@ -52,17 +52,29 @@ void game::Movable::setPos(float x, float y)
     _y = y;
 }
 
-
 void game::Movable::stop(float delta, sf::Vector2f def)
 {
-    if (vabs(_speed) < 10)
+    sf::Vector2f basis = {1, 0};
+    float c = vsin(basis, def);
+    if (fabs(c) < sqrt(2)/2 - 0.0)
     {
-        _speed = {-sgn(def.x)*20.f, -sgn(def.y)*20.f};
+        setPos(getPos().x - sgn(def.x), getPos().y);
+        _speed.x = 0;
     }
-    // delta для мощного отбрасывания игрока назад
-    _speed = static_cast<float>(-1.5)*_speed;
-    _x += _speed.x*delta;
-    _y += _speed.y*delta;
+
+    // Получается, все коллизии, для которых |fabs(c) - sqrt(2)/2| < 0.1 - 
+    // "ложные", и они учитываться не будут. Понятное дело, что можно обмануть
+    // эту систему, и если наискосок влететь в угол одиноко стоящего блока,
+    // то вы заедете в спрайт его. Однако 
+    //      1. За карту вы точно не выедете
+    //      2. Вас все равно потом выкинет оттуда
+    //      3. Вы тпшиться за стены энивей не сможете
+
+    if (fabs(c) > sqrt(2)/2 + 0.0)
+    {
+        setPos(getPos().x, getPos().y - sgn(def.y));
+        _speed.y = 0;
+    }
 }
 
 void game::Movable::collideHandling(Entity &op) {}

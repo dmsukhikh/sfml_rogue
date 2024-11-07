@@ -44,8 +44,3 @@ float game::vdeg(sf::Vector2f a, sf::Vector2f b)
         return 2*game::PI - out;
     }
 }
-
-int game::sgn(int i)
-{
-    return i == 0 ? 0 : 1 - 2*(i < 0); 
-}

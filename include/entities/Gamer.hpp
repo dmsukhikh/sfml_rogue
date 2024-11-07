@@ -6,7 +6,7 @@ namespace game
 {
 class Gamer : public Movable
 {
-    sf::ConvexShape _sprite;
+    sf::ConvexShape _sprite, _hitbox;
 
   public:
     Gamer(float x, float y);

@@ -69,20 +69,20 @@ game::MapManager::MapManager() : _gen(_rd())
                 {
                     case 'X':
                         tempmap._data.push_back(std::make_unique<game::Wall>(
-                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
+                            (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         break;
                     case '.':
                         tempmap._data.push_back(std::make_unique<game::Floor>(
-                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
+                            (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         break;
                     case 'P':
                         tempmap._data.push_back(std::make_unique<game::Port>(
-                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
+                            (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         tempmap._unlinkedPorts.insert(tempmap._data.size() - 1);
                         break;
                     default:
                         tempmap._data.push_back(std::make_unique<game::Floor>(
-                            x * Entity::BLOCK_SIZE, y * Entity::BLOCK_SIZE));
+                            (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         break;
                 }
 

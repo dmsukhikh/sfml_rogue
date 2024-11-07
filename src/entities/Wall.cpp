@@ -8,6 +8,7 @@ game::Wall::Wall(float x, float y) : Entity(x, y)
     type = game::EntityType::Wall;
     _outputShape.setSize({game::Entity::BLOCK_SIZE, game::Entity::BLOCK_SIZE});
     _outputShape.setFillColor(sf::Color::White);
+    _outputShape.setOrigin(BLOCK_SIZE/2.f, BLOCK_SIZE/2.f);
     _outputShape.setPosition(_x, _y);
 }
 

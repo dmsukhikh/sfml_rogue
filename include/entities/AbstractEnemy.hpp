@@ -10,12 +10,12 @@ struct Map;
 class AbstractEnemy : public Movable
 {
   protected:
-    static std::vector<std::vector<int>> graph;
-    static std::vector<sf::Vector2f> coordsData;
     std::pair<bool, sf::Vector2f> stopState = {false, {0, 0}};
+    static std::vector<std::vector<int>> graph;
     size_t idx = 0;
 
   public:
+    static std::vector<sf::Vector2f> coordsData;
     std::vector<int> path;
     AbstractEnemy(float x, float y);
     AbstractEnemy();

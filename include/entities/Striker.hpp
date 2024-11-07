@@ -6,7 +6,7 @@ namespace game
 {
 class Striker : public AbstractEnemy
 {
-    sf::RectangleShape _sprite;
+    sf::RectangleShape _sprite, _hitbox;
 
   public:
     Striker(float x, float y);
