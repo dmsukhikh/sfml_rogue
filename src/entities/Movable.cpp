@@ -10,7 +10,7 @@ game::Movable::Movable() : game::Movable(0, 0) {}
 void game::Movable::rotate(float x, float y)
 {
     sf::Vector2f view = sf::Vector2f(x, y) - getPos(),
-                 basis = {0, -1};
+                 basis = {1, 0};
 
     _angle = vdeg(basis, view);
 }

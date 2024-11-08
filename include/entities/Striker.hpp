@@ -7,10 +7,12 @@ namespace game
 {
 class Striker : public AbstractEnemy
 {
+  protected:
     sf::RectangleShape _sprite, _hitbox;
     static std::random_device seed;
     std::mt19937 gen;
     std::uniform_real_distribution<float> randShotCD;
+    float povx = 0.3, povy = 0.3;
     float addshotCD;
 
   public:

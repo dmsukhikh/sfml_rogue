@@ -28,7 +28,14 @@ float game::vcos(sf::Vector2f a, sf::Vector2f b)
 
 float game::vsin(sf::Vector2f a, sf::Vector2f b)
 {
-    return (a.x*b.y - a.y*b.x)/ (vabs(a) * vabs(b));
+    if (vabs(a) == 0. || vabs(b) == 0.)
+    {
+        return 0.;
+    }
+    else
+    {
+        return (a.x*b.y - a.y*b.x)/ (vabs(a) * vabs(b));
+    }
 }
 
 float game::vdeg(sf::Vector2f a, sf::Vector2f b)
@@ -41,6 +48,6 @@ float game::vdeg(sf::Vector2f a, sf::Vector2f b)
     }
     else
     {
-        return 2*game::PI - out;
+        return 360 - out;
     }
 }

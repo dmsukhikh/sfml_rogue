@@ -243,16 +243,19 @@ void game::Game::_inputHandling()
             }
             else if (ev.key.code == sf::Keyboard::Space)
             {
-                onMapEntities.push_back(std::make_unique<Shot>(
-                    gamer.getPos().x +
-                        cos((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30),
-                    gamer.getPos().y +
-                        sin((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30)));
-
-                auto it = onMapEntities.rbegin();
-                auto t = _curWin.mapPixelToCoords(_view);
-                (*it)->rotate(gamer.getAngle()-90);
-                (*it)->masterType = EntityType::Gamer;
+                // onMapEntities.push_back(std::make_unique<Shot>(
+                //     gamer.getPos().x +
+                //         cos((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30),
+                //     gamer.getPos().y +
+                //         sin((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30)));
+                //
+                // auto it = onMapEntities.rbegin();
+                // auto t = _curWin.mapPixelToCoords(_view);
+                // (*it)->rotate(gamer.getAngle()-90);
+                // (*it)->masterType = EntityType::Gamer;
+                auto shot = game::Lazer::getLazer(gamer.getPos(), gamer.getAngle());
+                shot.masterType = EntityType::Gamer;
+                onMapEntities.push_back(std::make_unique<Lazer>(shot));
             }
         }
 
@@ -275,19 +278,7 @@ void game::Game::_showObjects()
     for (const auto &i: onMapEntities)
     {
         i->show(_curWin);
-        if (i->getType() == EntityType::Enemy)
-        {
-            auto j = reinterpret_cast<Striker &>(*i);
-            for (auto k : j.path)
-            {
-                sf::RectangleShape dot({3, 3}); 
-                dot.setFillColor(sf::Color::Red);
-                dot.setPosition(AbstractEnemy::coordsData[k]);
-                _curWin.draw(dot);
-            }
-        }
     }
-
 
     _moveCamera();
     _guiScreens[_showingWindowIdx].show(_curWin);
@@ -398,7 +389,7 @@ void game::Game::_generateEnemies()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> randTile(
         0, mapManager.getRoom(room)._data.size()-1);
-    for (int i = 0; i < 16; ++i)
+    for (int i = 0; i < 0; ++i)
     {
         auto idx = 0;
         do
@@ -411,12 +402,27 @@ void game::Game::_generateEnemies()
         auto j = std::make_unique<Striker>(pos.x, pos.y);
         onMapEntities.push_back(std::move(j));
     }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        auto idx = 0;
+        do
+        {
+            idx = randTile(gen);
+        } while (mapManager.getRoom(room)._data[idx]->getType() !=
+                 EntityType::None);
+        auto pos = mapManager.getRoom(room)._data[idx]->getPos();
+
+        auto j = std::make_unique<Sniper>(pos.x, pos.y);
+        onMapEntities.push_back(std::move(j));
+    }
 }
 
 void game::Game::_initializeRoom(size_t i)
 {
     _curWin.clear();
     room = i;
+    Lazer::setMap(&mapManager.getRoom(room)._data);
     AbstractEnemy::setGraph(mapManager.getRoom(room));
     onMapEntities.clear();
     gamer.setPos(Entity::BLOCK_SIZE*3, Entity::BLOCK_SIZE*3);

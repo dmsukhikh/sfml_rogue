@@ -2,7 +2,6 @@
 #include "../../include/MapManager.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <stdexcept>
-#include <iostream>
 #include <random>
 #include <queue>
 #include "../../include/vecmath.hpp"
@@ -149,7 +148,6 @@ void game::AbstractEnemy::setPanicPoint(
             }
         }
         panicPoint = newPanic;
-        std::cout << newPanic.x << " " << newPanic.y << std::endl;
     }
     panicCD += delta;
 }

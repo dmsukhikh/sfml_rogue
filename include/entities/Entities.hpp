@@ -3,4 +3,5 @@
 #include "Striker.hpp"
 #include "Gamer.hpp"
 #include "Bullets.hpp"
+#include "Sniper.hpp"
 

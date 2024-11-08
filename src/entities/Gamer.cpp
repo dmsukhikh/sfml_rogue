@@ -3,6 +3,8 @@
 #include <SFML/System/Vector2.hpp>
 #include <cmath>
 #include <memory>
+#include <iostream>
+#include <cstdlib>
 
 
 game::Gamer::Gamer(float x, float y) : Movable(x, y)
@@ -43,7 +45,7 @@ bool game::Gamer::collide(const Entity &op) const
 void game::Gamer::rotate(float x, float y)
 {
     game::Movable::rotate(x, y);
-    _sprite.setRotation(_angle);
+    _sprite.setRotation(_angle-30);
 }
 
 void game::Gamer::move(float delta)

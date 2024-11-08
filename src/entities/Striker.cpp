@@ -99,7 +99,7 @@ std::optional<std::unique_ptr<game::Movable>> game::Striker::shot(float delta)
         addshotCD = randShotCD(gen);
         auto it = std::make_unique<game::Shot>(getPos().x, getPos().y);
         it->masterType = EntityType::Enemy;
-        it->rotate(_angle+270);
+        it->rotate(_angle);
         return it;
     }
     shotCD += delta; 
@@ -108,8 +108,8 @@ std::optional<std::unique_ptr<game::Movable>> game::Striker::shot(float delta)
 
 void game::Striker::processMoving(sf::Vector2f gamerPos)
 {
-    if (fabs(gamerPos.x - getPos().x) >= screenSize.x*0.35 ||  
-        fabs(gamerPos.y - getPos().y) >= screenSize.y*0.35)
+    if (fabs(gamerPos.x - getPos().x) >= screenSize.x*povx ||  
+        fabs(gamerPos.y - getPos().y) >= screenSize.y*povy)
     {
         findPathToPoint(gamerPos.x, gamerPos.y);
     }
