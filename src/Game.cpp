@@ -5,7 +5,6 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
-#include "../include/vecmath.hpp"
 #include <iostream>
 #include <algorithm>
 #include <memory>
@@ -243,19 +242,12 @@ void game::Game::_inputHandling()
             }
             else if (ev.key.code == sf::Keyboard::Space)
             {
-                // onMapEntities.push_back(std::make_unique<Shot>(
-                //     gamer.getPos().x +
-                //         cos((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30),
-                //     gamer.getPos().y +
-                //         sin((gamer.getAngle()-90)/RADTODEG) * (50 * sqrt(3) / 4 + 30)));
-                //
-                // auto it = onMapEntities.rbegin();
-                // auto t = _curWin.mapPixelToCoords(_view);
-                // (*it)->rotate(gamer.getAngle()-90);
-                // (*it)->masterType = EntityType::Gamer;
-                auto shot = game::Lazer::getLazer(gamer.getPos(), gamer.getAngle());
-                shot.masterType = EntityType::Gamer;
-                onMapEntities.push_back(std::make_unique<Lazer>(shot));
+                onMapEntities.push_back(
+                    std::make_unique<Shot>(gamer.getPos().x, gamer.getPos().y));
+                auto it = onMapEntities.rbegin();
+                auto t = _curWin.mapPixelToCoords(_view);
+                (*it)->rotate(gamer.getAngle());
+                (*it)->masterType = EntityType::Gamer;
             }
         }
 
@@ -389,7 +381,7 @@ void game::Game::_generateEnemies()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> randTile(
         0, mapManager.getRoom(room)._data.size()-1);
-    for (int i = 0; i < 0; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         auto idx = 0;
         do
@@ -399,7 +391,7 @@ void game::Game::_generateEnemies()
                  EntityType::None);
         auto pos = mapManager.getRoom(room)._data[idx]->getPos();
 
-        auto j = std::make_unique<Striker>(pos.x, pos.y);
+        auto j = std::make_unique<Bigboy>(pos.x, pos.y);
         onMapEntities.push_back(std::move(j));
     }
 
@@ -413,7 +405,7 @@ void game::Game::_generateEnemies()
                  EntityType::None);
         auto pos = mapManager.getRoom(room)._data[idx]->getPos();
 
-        auto j = std::make_unique<Sniper>(pos.x, pos.y);
+        auto j = std::make_unique<Wizard>(pos.x, pos.y);
         onMapEntities.push_back(std::move(j));
     }
 }

@@ -1,23 +1,22 @@
 #pragma once
 #include "AbstractEnemy.hpp"
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <random>
 
-namespace game
+namespace game 
 {
-class Striker : public AbstractEnemy
+class Bigboy : public AbstractEnemy
 {
   protected:
-    sf::RectangleShape _sprite, _hitbox;
-    static std::random_device seed;
+    sf::CircleShape _sprite;
+    sf::RectangleShape _hitbox;
     std::mt19937 gen;
-    std::uniform_real_distribution<float> randShotCD;
-    float povx = 0.3, povy = 0.3;
-    float addshotCD = 0;
+    float damageCD = 0;
 
   public:
-    Striker(float x, float y);
-    Striker();
+    Bigboy(float x, float y);
+    Bigboy();
 
     // Entity overridings
     void show(sf::RenderWindow &win) const override;
@@ -26,6 +25,7 @@ class Striker : public AbstractEnemy
     std::unique_ptr<Entity> copy() const override;
 
     // Movable overridings
+    void collideHandling(Movable &op) override;
     void rotate(float x, float y) override;
     void move(float delta) override;
     void stop(float delta, sf::Vector2f def) override;

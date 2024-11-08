@@ -31,7 +31,11 @@ add_library(entities src/entities/Entity.cpp
                      src/entities/AbstractEnemy.cpp
                      src/entities/Striker.cpp
                      src/entities/Lazer.cpp
-                     src/entities/Sniper.cpp)
+                     src/entities/Sniper.cpp
+                     src/entities/Bigboy.cpp
+                     src/entities/Wolf.cpp
+                     src/entities/Fireball.cpp
+                     src/entities/Wizard.cpp)
 
 add_library(vecmath src/vecmath.cpp)
 

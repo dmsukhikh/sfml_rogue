@@ -74,6 +74,8 @@ void game::Striker::move(float delta)
     game::Movable::move(delta);
     _sprite.move(_speed * delta);
     _hitbox.move(_speed * delta);
+
+    shotCD += delta; 
 }
 
 void game::Striker::setPos(float x, float y)
@@ -102,7 +104,6 @@ std::optional<std::unique_ptr<game::Movable>> game::Striker::shot(float delta)
         it->rotate(_angle);
         return it;
     }
-    shotCD += delta; 
     return std::nullopt;
 }
 

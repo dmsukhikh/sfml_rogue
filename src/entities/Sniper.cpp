@@ -11,6 +11,7 @@
 
 game::Sniper::Sniper(float x, float y) : Striker(x, y)
 {
+    _MAXSPEEDABS = 228;
     addshotCD = randShotCD(gen);
     _circle = sf::CircleShape(Entity::BLOCK_SIZE/5.f);
     _circle.setOrigin(_circle.getLocalBounds().width / 2.f,

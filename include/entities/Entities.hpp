@@ -4,4 +4,7 @@
 #include "Gamer.hpp"
 #include "Bullets.hpp"
 #include "Sniper.hpp"
+#include "Bigboy.hpp"
+#include "Wolf.hpp"
+#include "Wizard.hpp"
 
