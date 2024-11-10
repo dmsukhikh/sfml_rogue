@@ -104,3 +104,13 @@ void game::Shot::collideHandling(Movable &op)
         }
     }
 }
+ 
+// ---
+
+game::GamerShot::GamerShot(float x, float y) : Shot(x, y)
+{
+    _speed = {1200.f, 1200.f};
+    _sprite.setFillColor(sf::Color::Green);
+}
+
+game::GamerShot::GamerShot() : game::GamerShot(0, 0) {}

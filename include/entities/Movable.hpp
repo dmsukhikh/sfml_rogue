@@ -11,7 +11,7 @@ class Movable : public Entity
     // пока что это не нужно
 
   protected:
-    const float _SIZE = 50;
+    float _SIZE = 50;
     float _MAXSPEEDABS = 400;
     float _ACCABS = 1500;
     float _SLOWDOWNABS = 600;

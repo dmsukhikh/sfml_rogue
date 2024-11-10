@@ -7,6 +7,7 @@
 #include <random>
 #include <stdexcept>
 #include <iostream>
+#include <queue>
 
 game::Map::Map(const Map &op)
 {
@@ -15,6 +16,8 @@ game::Map::Map(const Map &op)
     {
         _data.push_back(i->copy());
     }
+    isLvlPort = op.isLvlPort;
+    _lvlPortIdx = op._lvlPortIdx;
     _unlinkedPorts = op._unlinkedPorts;
     _linkedPorts = op._linkedPorts;
     _adjList = op._adjList;
@@ -29,6 +32,11 @@ void game::Map::removeUnlinkedPorts()
     {
         _data[i] = std::make_unique<game::Floor>(_data[i]->getPos().x,
                                                  _data[i]->getPos().y);
+    }
+    if (!isLvlPort)
+    {
+        _data[_lvlPortIdx] = std::make_unique<game::Floor>(
+            _data[_lvlPortIdx]->getPos().x, _data[_lvlPortIdx]->getPos().y);
     }
     _unlinkedPorts.clear();
 }
@@ -81,6 +89,13 @@ game::MapManager::MapManager() : _gen(_rd())
                             (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         tempmap._unlinkedPorts.insert(tempmap._data.size() - 1);
                         break;
+
+                    case 'L':
+                        tempmap._data.push_back(std::make_unique<game::LevelPort>(
+                            (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
+                        tempmap._lvlPortIdx = tempmap._data.size() - 1;
+                        break;
+
                     default:
                         tempmap._data.push_back(std::make_unique<game::Floor>(
                             (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
@@ -135,6 +150,7 @@ void game::MapManager::generateNewLevel()
     // комнат. Есть часть связная и несвязная: после линковки с некоторой
     // комнатой из связной части, новая комната попадает туда. Потом, все 
     // неслинкованные телепорты заменяются на game::Floor объекты
+    std::vector<std::vector<int>> graph(LEVELNUM);
     for (size_t i = 1; i < LEVELNUM; ++i)
     {
         if (level[i]._unlinkedPorts.empty()) continue;
@@ -143,20 +159,60 @@ void game::MapManager::generateNewLevel()
         auto rand = std::uniform_int_distribution<size_t>(0, i-1); 
         size_t tolink = rand(_gen);
 
-        // ! В связной части не должно быть так, чтобы все порталы были заполнены.
-        // ! Поэтому важно, чтобы в каждой новой карте было минимум два телепорта
-        for (;level[tolink]._unlinkedPorts.empty(); tolink = rand(_gen));
+        // ! В связной части не должно быть так, чтобы все порталы были
+        // заполнены. ! Поэтому важно, чтобы в каждой новой карте было минимум
+        // два телепорта ! Также важно, чтобы на каждой карте был один, и только
+        // один Level-телепорт
+
+        for (; level[tolink]._unlinkedPorts.empty(); tolink = rand(_gen));
         level[tolink].linkPort(i);
         level[i].linkPort(tolink);
+        
+        graph[i].push_back(tolink);
+        graph[tolink].push_back(i);
         std::cout << tolink << " " << i << std::endl;
     }
+    std::cout << std::endl;
+
+    // Нахождение самого дальнего уровня от 0-го с помощью bfs. Там будет 
+    // телепорт на новый левел
+    std::vector<std::pair<int, int>> pathData(level.size(), {-1, true});
+    {
+        std::queue<size_t> q;
+        q.push(0);   
+        pathData[0].second = false;
+        int cnt = 0;
+        pathData[0].first = cnt++;
+
+        while (!q.empty())
+        {
+            size_t i = q.front();
+            q.pop();
+            for (auto j : graph[i])
+            {
+                if (pathData[j].second)
+                {
+                    pathData[j].first = cnt;
+                    pathData[j].second = false;
+                    q.push(j);
+                }
+            }
+            cnt++;
+            pathData[i].second = false;
+        }
+    }
+
+    size_t lvlportRoom =
+        std::max_element(pathData.begin(), pathData.end()) - pathData.begin();
+    level[lvlportRoom].isLvlPort = true;
+
     for (auto &i: level)
     {
         i.removeUnlinkedPorts();
     }
 }
 
-const game::Map &game::MapManager::getRoom(uint32_t idx)
+game::Map &game::MapManager::getRoom(uint32_t idx)
 {
     if (idx >= level.size())
     {

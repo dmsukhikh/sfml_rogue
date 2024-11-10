@@ -36,19 +36,37 @@ class Floor : public Entity
 
 class Port : public Wall
 {
+    static sf::Font f; 
+    static bool fontIsLoaded;
+    sf::Text idxToTeleport;
+
+protected:
     uint64_t _idx;
     bool isActive = false;
     bool isLinked = false;
-    static const sf::Color COL;
-    static const sf::Color DISABLED_COL;
+
+    // не-статик, чтобы в наследуемых телепортах переопределялись штуки
+    EntityType activeType;
+    sf::Color col;
+    sf::Color disabledCol;
+
 public:
     Port();
     Port(float x, float y);
 
     void changeActiveness(bool isActive);
+    void show(sf::RenderWindow &win) const override;
     bool getLinked() const;
     void setIdx(uint64_t idx);
     uint64_t getIdx() const;
     std::unique_ptr<Entity> copy() const override;
 };
-}
+
+class LevelPort : public Port
+{
+  public:
+    LevelPort();
+    LevelPort(float x, float y);
+    std::unique_ptr<Entity> copy() const override;
+};
+} // namespace game

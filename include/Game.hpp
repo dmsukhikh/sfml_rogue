@@ -27,9 +27,9 @@ class Game
     MapManager mapManager;
     std::list<std::unique_ptr<Movable>> onMapEntities;
 
-    uint32_t level = 0, room = 0;
+    uint32_t level = 1, room = 0, enemies = 3;
     sf::Clock _frameClock;
-    sf::View cam;
+    sf::View cam, actCam;
     sf::Vector2i _view = {0, 0};
 
     void _setMenusWindows();

@@ -16,9 +16,10 @@ struct Map
 
     void removeUnlinkedPorts();
     void linkPort(uint64_t idx);
-    bool isCleared = false;
+    bool isCleared = false, isLvlPort = false;
 
     uint64_t width, height;
+    size_t _lvlPortIdx;
     std::set<std::size_t> _unlinkedPorts, _linkedPorts;
     std::vector<std::vector<int>> _adjList;
     std::vector<sf::Vector2f> _mapCoords;
@@ -39,7 +40,7 @@ class MapManager
   public:
     MapManager();
     void generateNewLevel();
-    const Map& getRoom(uint32_t idx);
+    Map& getRoom(uint32_t idx);
 };
 
 }

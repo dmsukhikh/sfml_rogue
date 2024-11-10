@@ -21,6 +21,7 @@ enum class EntityType
     Shot,
     Gamer,
     Enemy,
+    LevelPort,
     None
 };
 

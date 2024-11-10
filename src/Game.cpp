@@ -22,6 +22,7 @@ game::Game::Game()
     cam.setSize({_settings.screenSize.first*1.f, _settings.screenSize.second*1.f});
     cam.setCenter({_settings.screenSize.first*0.5f, _settings.screenSize.second*0.5f});
     _curWin.setView(cam);
+    actCam = cam;
     gamer.setPos(200, 200);
     _setMenusWindows();
     game::AbstractEnemy::setScreenSize(sf::Vector2f{
@@ -154,6 +155,7 @@ void game::Game::mainloop()
         }
         else
         {
+            _curWin.setView(actCam);
             _guiScreens[_showingWindowIdx].displayWidgets(_curWin);
             while (_curWin.pollEvent(ev))
             {
@@ -212,9 +214,9 @@ void game::Game::_inputHandling()
                 _keyMoveDownIsPressed = true;
                 gamer._ymovement = 10;
             }
-            else if (ev.key.code == sf::Keyboard::H)
+            else if (ev.key.code == sf::Keyboard::Space)
             {
-                _activatePorts();
+                gamer.isShooting = true;
             }
         }
         
@@ -242,12 +244,7 @@ void game::Game::_inputHandling()
             }
             else if (ev.key.code == sf::Keyboard::Space)
             {
-                onMapEntities.push_back(
-                    std::make_unique<Shot>(gamer.getPos().x, gamer.getPos().y));
-                auto it = onMapEntities.rbegin();
-                auto t = _curWin.mapPixelToCoords(_view);
-                (*it)->rotate(gamer.getAngle());
-                (*it)->masterType = EntityType::Gamer;
+                gamer.isShooting = false;
             }
         }
 
@@ -279,6 +276,7 @@ void game::Game::_showObjects()
 
 void game::Game::_ingameHandling(float delta)
 {
+    bool _needNewLevel = false;
     auto t = _curWin.mapPixelToCoords(_view);
     for (auto &&i: mapManager.getRoom(room)._data)
     {
@@ -294,6 +292,12 @@ void game::Game::_ingameHandling(float delta)
                 case game::EntityType::Port:
                     _initializeRoom(reinterpret_cast<Port &>(*i).getIdx());
                     std::cout << room << std::endl;
+                    break;
+
+                case game::EntityType::LevelPort:
+                    _needNewLevel = true;
+                    enemies += 2;
+                    break;
 
                 default:
                     break;
@@ -311,7 +315,12 @@ void game::Game::_ingameHandling(float delta)
     {
         if ((*it)->collide(gamer))
         {
+            int oldhp = gamer.getHp();
             (*it)->collideHandling(gamer);
+            if (oldhp != gamer.getHp())
+            {
+                std::cout << "hp: " << gamer.getHp() << std::endl;
+            }
         }
         for (auto j = it; j != onMapEntities.end(); ++j)
         {
@@ -321,9 +330,18 @@ void game::Game::_ingameHandling(float delta)
             }
         }
     }
-
+    
     gamer.move(delta);
     gamer.rotate(t.x, t.y);
+    if (gamer.isShooting)
+    {
+        auto shot = gamer.shot(delta);
+        if (shot.has_value())
+        {
+            onMapEntities.push_back(std::move(shot.value()));
+        }
+    }
+
     // Искуственный интеллект
     for (auto &obj: onMapEntities)
     {
@@ -350,6 +368,41 @@ void game::Game::_ingameHandling(float delta)
     auto it = std::remove_if(onMapEntities.begin(), onMapEntities.end(), 
             [](std::unique_ptr<Movable> &i){ return !i->isExisted; });
     onMapEntities.erase(it, onMapEntities.end());
+
+    if (_needNewLevel)
+    {
+        mapManager.generateNewLevel();
+        _initializeRoom(0);
+        ++level;
+    }
+
+    {
+        int enemycnt = 0;
+        for (auto &i : onMapEntities)
+        {
+            if (i->getType() == EntityType::Enemy)
+                ++enemycnt;
+        }
+        if (!enemycnt)
+        {
+            mapManager.getRoom(room).isCleared = true;
+            _activatePorts();
+        }
+    }
+
+    if (gamer.getHp() == 0)
+    {
+        std::cout << "You are dead X-(" << std::endl;
+        _gameIsRunning = false;
+        _showingWindowIdx = 0;
+        onMapEntities.clear();
+        mapManager.generateNewLevel();
+        room = 0;
+        level = 1;
+        enemies = 3;
+        _initializeRoom(0);
+        gamer = game::Gamer(Entity::BLOCK_SIZE*3.f, Entity::BLOCK_SIZE*3.f);
+    }
 }
 
 void game::Game::_moveCamera()
@@ -373,6 +426,11 @@ void game::Game::_activatePorts()
     {
         reinterpret_cast<Port &>(*rm._data[idx]).changeActiveness(true);
     }
+    if (rm.isLvlPort)
+    {
+        reinterpret_cast<LevelPort &>(*rm._data[rm._lvlPortIdx])
+            .changeActiveness(true);
+    }
 }
 
 void game::Game::_generateEnemies()
@@ -381,7 +439,9 @@ void game::Game::_generateEnemies()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<size_t> randTile(
         0, mapManager.getRoom(room)._data.size()-1);
-    for (int i = 0; i < 3; ++i)
+    std::uniform_real_distribution<float> randEnemy;
+
+    for (int i = 0; i < enemies; ++i)
     {
         auto idx = 0;
         do
@@ -391,22 +451,40 @@ void game::Game::_generateEnemies()
                  EntityType::None);
         auto pos = mapManager.getRoom(room)._data[idx]->getPos();
 
-        auto j = std::make_unique<Bigboy>(pos.x, pos.y);
-        onMapEntities.push_back(std::move(j));
-    }
+        std::unique_ptr<game::Movable> enemy;
 
-    for (int i = 0; i < 3; ++i)
-    {
-        auto idx = 0;
-        do
+        bool isChosen = false;
+        while (!isChosen)
         {
-            idx = randTile(gen);
-        } while (mapManager.getRoom(room)._data[idx]->getType() !=
-                 EntityType::None);
-        auto pos = mapManager.getRoom(room)._data[idx]->getPos();
+            float prob = randEnemy(gen);
+            if (prob <= 0.2)
+            {
+                enemy = std::make_unique<Striker>(pos.x, pos.y);
+                isChosen = true;
+            }
+            else if (prob > 0.2 && prob <= 0.4 && level > 1)
+            {
+                enemy = std::make_unique<Sniper>(pos.x, pos.y);
+                isChosen = true;
+            }
+            else if (prob > 0.4 && prob <= 0.6 && level > 1)
+            {
+                enemy = std::make_unique<Bigboy>(pos.x, pos.y);
+                isChosen = true;
+            }
+            else if (prob > 0.6 && prob <= 0.8 && level > 2)
+            {
+                enemy = std::make_unique<Wizard>(pos.x, pos.y);
+                isChosen = true;
+            }
+            else if (prob > 0.8 && prob <= 1 && level > 2)
+            {
+                enemy = std::make_unique<Wolf>(pos.x, pos.y);
+                isChosen = true;
+            }
+        }
 
-        auto j = std::make_unique<Wizard>(pos.x, pos.y);
-        onMapEntities.push_back(std::move(j));
+        onMapEntities.push_back(std::move(enemy));
     }
 }
 
@@ -418,8 +496,14 @@ void game::Game::_initializeRoom(size_t i)
     AbstractEnemy::setGraph(mapManager.getRoom(room));
     onMapEntities.clear();
     gamer.setPos(Entity::BLOCK_SIZE*3, Entity::BLOCK_SIZE*3);
+
     if (!mapManager.getRoom(room).isCleared)
     {
+        // Случайная возможность того, что увеличится число врагов
+        std::random_device seed;
+        std::mt19937 gen(seed());
+        std::uniform_real_distribution<float> randIncEnemy;
+        if (randIncEnemy(gen) <= 0.1) ++enemies;
         _generateEnemies();
     }
 }

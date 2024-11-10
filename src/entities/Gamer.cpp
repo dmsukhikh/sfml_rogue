@@ -1,9 +1,9 @@
 #include "../../include/entities/Gamer.hpp"
 #include "../../include/vecmath.hpp"
 #include <SFML/System/Vector2.hpp>
+#include "../../include/entities/Bullets.hpp"
 #include <cmath>
 #include <memory>
-#include <iostream>
 #include <cstdlib>
 
 
@@ -53,6 +53,8 @@ void game::Gamer::move(float delta)
     game::Movable::move(delta);
     _sprite.move(_speed*delta);
     _hitbox.move(_speed*delta);
+
+    shotCD += delta;
 }
 
 
@@ -86,3 +88,15 @@ void game::Gamer::stop(float delta, sf::Vector2f def)
     _hitbox.move(_speed*delta);
 }
 
+std::optional<std::unique_ptr<game::Movable>> game::Gamer::shot(float delta)
+{
+    if (shotCD > 0.2)
+    {
+        shotCD = 0;
+        auto ret = std::make_unique<game::GamerShot>(getPos().x, getPos().y);
+        ret->rotate(_angle);
+        ret->masterType = EntityType::Gamer;
+        return ret;
+    }
+    return std::nullopt;
+}
