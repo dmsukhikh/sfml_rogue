@@ -4,6 +4,7 @@
 
 game::Wizard::Wizard(float x, float y) : Striker(x, y)
 {
+    bounty = 300;
     addshotCD = randShotCD(gen);
     _hat = sf::RectangleShape({Entity::BLOCK_SIZE/3.f, Entity::BLOCK_SIZE/3.f});
     _hat.setOrigin({_hat.getLocalBounds().width / 2.f,

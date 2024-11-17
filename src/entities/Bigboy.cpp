@@ -2,12 +2,12 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <memory>
-#include <iostream>
 #include "../../include/vecmath.hpp"
 
 game::Bigboy::Bigboy(float x, float y) : AbstractEnemy(x, y)
 {
-    _MAXSPEEDABS = 100;
+    bounty = 250;
+    _MAXSPEEDABS = 250;
     _hp = 15;
     _sprite = sf::CircleShape(BLOCK_SIZE*0.66f, 5);
     _sprite.setOrigin({BLOCK_SIZE/2.f, BLOCK_SIZE/2.f});

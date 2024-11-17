@@ -2,6 +2,7 @@
 
 game::Wolf::Wolf(float x, float y) : Bigboy(x, y)
 {
+    bounty = 150;
     _MAXSPEEDABS = 550;
     _sprite.setScale({0.7, 0.7});
     _hitbox.setScale({0.7, 0.7});

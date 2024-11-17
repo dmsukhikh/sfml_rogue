@@ -37,6 +37,7 @@ class AbstractEnemy : public Movable
 
     virtual std::optional<std::unique_ptr<game::Movable>> shot(float delta) = 0;
     virtual void processMoving(sf::Vector2f gamerPos) = 0;
+
 };
 
 } // namespace game

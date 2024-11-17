@@ -167,12 +167,11 @@ void game::MapManager::generateNewLevel()
         for (; level[tolink]._unlinkedPorts.empty(); tolink = rand(_gen));
         level[tolink].linkPort(i);
         level[i].linkPort(tolink);
-        
+
         graph[i].push_back(tolink);
         graph[tolink].push_back(i);
-        std::cout << tolink << " " << i << std::endl;
     }
-    std::cout << std::endl;
+    curGraph = graph;
 
     // Нахождение самого дальнего уровня от 0-го с помощью bfs. Там будет 
     // телепорт на новый левел
@@ -205,6 +204,7 @@ void game::MapManager::generateNewLevel()
     size_t lvlportRoom =
         std::max_element(pathData.begin(), pathData.end()) - pathData.begin();
     level[lvlportRoom].isLvlPort = true;
+    endPoint = lvlportRoom;
 
     for (auto &i: level)
     {
@@ -220,3 +220,5 @@ game::Map &game::MapManager::getRoom(uint32_t idx)
     }
     return level[idx];
 }
+
+int game::MapManager::getEndPoint() const { return endPoint; }

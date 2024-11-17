@@ -17,6 +17,8 @@ game::Gamer::Gamer(float x, float y) : Movable(x, y)
     _sprite.setOrigin({_SIZE/2, _SIZE*fsqrt(3)/3});
     _sprite.setPosition(_x, _y);
     _hitbox = _sprite;
+    maxHP = 10;
+    _hp = maxHP;
     type = game::EntityType::Gamer;
 }
 
@@ -100,3 +102,5 @@ std::optional<std::unique_ptr<game::Movable>> game::Gamer::shot(float delta)
     }
     return std::nullopt;
 }
+
+int game::Gamer::getMaxHp() const { return maxHP; }

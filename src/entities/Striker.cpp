@@ -12,6 +12,7 @@ std::random_device game::Striker::seed{};
 game::Striker::Striker(float x, float y) : AbstractEnemy(x, y), gen(seed()),
     randShotCD(0, 1)
 {
+    bounty = 150;
     _sprite.setSize({BLOCK_SIZE, BLOCK_SIZE}); 
     _sprite.setFillColor({255, 190, 190});
     _sprite.setOrigin({BLOCK_SIZE/2.f, BLOCK_SIZE/2.f});

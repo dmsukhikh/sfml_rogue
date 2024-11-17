@@ -1,4 +1,6 @@
 #include "../include/Game.hpp"
+#include "../include/vecmath.hpp"
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -9,6 +11,9 @@
 #include <algorithm>
 #include <memory>
 #include <random>
+#include <string>
+#include <sstream>
+#include <iomanip>
 
 using Anchor = game::GridPacker::Anchor;
 
@@ -19,6 +24,7 @@ game::Game::Game()
         "SFML: Rogue");
     _curWin.setFramerateLimit(75);
     _curWin.setKeyRepeatEnabled(false);
+    _hudfont.loadFromFile("resources/ThaleahFat.ttf");
     cam.setSize({_settings.screenSize.first*1.f, _settings.screenSize.second*1.f});
     cam.setCenter({_settings.screenSize.first*0.5f, _settings.screenSize.second*0.5f});
     _curWin.setView(cam);
@@ -28,6 +34,7 @@ game::Game::Game()
     game::AbstractEnemy::setScreenSize(sf::Vector2f{
         1.f * _settings.screenSize.first, 1.f * _settings.screenSize.second});
     mapManager.generateNewLevel();
+
 }
 
 void game::Game::_setGreetingWindow()
@@ -168,6 +175,8 @@ void game::Game::mainloop()
 
 void game::Game::_setGameGui()
 {
+    // функцию убрать, строку 50 тоже
+
     game::GridPacker gui(_settings.screenSize.first,
                          _settings.screenSize.second);
     _guiScreens.push_back(gui);
@@ -218,6 +227,10 @@ void game::Game::_inputHandling()
             {
                 gamer.isShooting = true;
             }
+            else if (ev.key.code == sf::Keyboard::Tab)
+            {
+                _isMinimapShowed = true;
+            }
         }
         
         else if (ev.type == sf::Event::KeyReleased)
@@ -246,6 +259,10 @@ void game::Game::_inputHandling()
             {
                 gamer.isShooting = false;
             }
+            else if (ev.key.code == sf::Keyboard::Tab)
+            {
+                _isMinimapShowed = false;
+            }
         }
 
         if (ev.type == sf::Event::MouseMoved)
@@ -270,7 +287,9 @@ void game::Game::_showObjects()
     }
 
     _moveCamera();
-    _guiScreens[_showingWindowIdx].show(_curWin);
+    // _guiScreens[_showingWindowIdx].show(_curWin);
+    _showGameHUD();
+    if (_isMinimapShowed) _showMinimap();
     _curWin.display();
 }
 
@@ -297,6 +316,7 @@ void game::Game::_ingameHandling(float delta)
                 case game::EntityType::LevelPort:
                     _needNewLevel = true;
                     enemies += 2;
+                    gamer.score += level*1000;
                     break;
 
                 default:
@@ -315,12 +335,7 @@ void game::Game::_ingameHandling(float delta)
     {
         if ((*it)->collide(gamer))
         {
-            int oldhp = gamer.getHp();
             (*it)->collideHandling(gamer);
-            if (oldhp != gamer.getHp())
-            {
-                std::cout << "hp: " << gamer.getHp() << std::endl;
-            }
         }
         for (auto j = it; j != onMapEntities.end(); ++j)
         {
@@ -365,6 +380,16 @@ void game::Game::_ingameHandling(float delta)
         i->move(delta);
     }
 
+    // Поскольку монстрики могут умереть только от игрока, мы даем награды за
+    // тех, у кого isExisted == false
+    for (auto &i: onMapEntities)
+    {
+        if (!i->isExisted)
+        {
+            gamer.score += i->getBounty();
+        }
+    }
+
     auto it = std::remove_if(onMapEntities.begin(), onMapEntities.end(), 
             [](std::unique_ptr<Movable> &i){ return !i->isExisted; });
     onMapEntities.erase(it, onMapEntities.end());
@@ -372,8 +397,8 @@ void game::Game::_ingameHandling(float delta)
     if (_needNewLevel)
     {
         mapManager.generateNewLevel();
-        _initializeRoom(0);
         ++level;
+        _initializeRoom(0);
     }
 
     {
@@ -390,16 +415,25 @@ void game::Game::_ingameHandling(float delta)
         }
     }
 
+    {
+        gamerScoreClock += delta;
+        if (gamerScoreClock >= 0.1) 
+        {
+            gamer.score += level;
+            gamerScoreClock = 0;
+        }
+    }
+
     if (gamer.getHp() == 0)
     {
-        std::cout << "You are dead X-(" << std::endl;
+        std::cout << "Final score: " << gamer.score << std::endl;
         _gameIsRunning = false;
         _showingWindowIdx = 0;
         onMapEntities.clear();
         mapManager.generateNewLevel();
         room = 0;
         level = 1;
-        enemies = 3;
+        enemies = 1;
         _initializeRoom(0);
         gamer = game::Gamer(Entity::BLOCK_SIZE*3.f, Entity::BLOCK_SIZE*3.f);
     }
@@ -506,4 +540,105 @@ void game::Game::_initializeRoom(size_t i)
         if (randIncEnemy(gen) <= 0.1) ++enemies;
         _generateEnemies();
     }
+}
+
+
+void game::Game::_showGameHUD()
+{
+    std::string tempstr = std::to_string(gamer.getHp()) + "\\" +
+                           std::to_string(gamer.getMaxHp()) + " hp";
+    sf::Text hudhp(tempstr, _hudfont, 30);
+    hudhp.setPosition(cam.getCenter() - cam.getSize() / 2.f +
+                      sf::Vector2f{50, 20});
+    hudhp.setFillColor(sf::Color::Red);
+    hudhp.setOutlineColor(sf::Color::Black);
+    hudhp.setOutlineThickness(2.f);
+
+    std::stringstream scoreStream;
+    scoreStream << "score: " << std::setfill('0') << std::setw(7) << gamer.score;
+    tempstr = std::string(std::istreambuf_iterator(scoreStream), {});
+    sf::Text hudscore(tempstr, _hudfont, 30);
+    hudscore.setPosition(
+        cam.getCenter() +
+        sf::Vector2f{cam.getSize().x / 2.f - 230, -cam.getSize().y / 2.f + 20});
+    hudscore.setFillColor(sf::Color::Red);
+    hudscore.setOutlineColor(sf::Color::Black);
+    hudscore.setOutlineThickness(2.f);
+
+    _curWin.draw(hudhp);
+    _curWin.draw(hudscore);
+
+}
+
+
+void game::Game::_showMinimap()
+{
+    sf::RectangleShape blur(cam.getSize());
+    blur.setFillColor({0,0,0,200});
+    blur.setPosition(cam.getCenter()-cam.getSize()/2.f);
+    _curWin.draw(blur);
+
+    // Рисуем граф
+    sf::CircleShape dotsgen(cam.getSize().y/3.f, mapManager.LEVELNUM); 
+    dotsgen.setOrigin(dotsgen.getLocalBounds().getSize()/2.f);
+    dotsgen.setPosition(cam.getCenter());
+    std::vector<sf::Vector2f> dots;
+
+    for (int i = 0; i < mapManager.LEVELNUM; ++i)
+    {
+        dots.push_back(dotsgen.getPoint(i) + dotsgen.getPosition() -
+                       dotsgen.getOrigin());
+    }
+
+    for (int i = 0; i < mapManager.LEVELNUM; ++i)
+    {
+        for (auto &j: mapManager.curGraph[i])
+        {
+            if (j > i) break;
+            sf::RectangleShape link({vabs(dots[j] - dots[i])+10, 10});
+            link.setOrigin({0, 5});
+            link.setFillColor({50, 50, 50});
+            link.setOutlineThickness(2.f);
+            link.setOutlineColor(sf::Color::Black);
+            link.setPosition(dots[i]+sf::Vector2f{25,25});
+            link.setRotation(360-vdeg(dots[j]-dots[i], {1, 0}));
+            _curWin.draw(link);
+        }
+    }
+
+
+    for (int i = 0; i < mapManager.LEVELNUM; ++i)
+    {
+        sf::RectangleShape roomrect({50, 50});
+        sf::Color roomcol = sf::Color::Magenta;
+        if (!mapManager.getRoom(i).isCleared && i != room)
+        {
+            roomcol.r *= 0.3;
+            roomcol.g *= 0.3;
+            roomcol.b *= 0.3;
+        }
+
+        if (i == mapManager.getEndPoint())
+        {
+            roomcol = sf::Color::Yellow;
+        }
+
+        if (i == room)
+        {
+            roomcol = sf::Color::Green;
+        }
+
+        roomrect.setFillColor(roomcol);
+        roomrect.setPosition(dots[i]);
+        
+        sf::Text number(std::to_string(i), _hudfont, 40);
+        number.setPosition(
+            roomrect.getPosition() +
+            sf::Vector2f{roomrect.getLocalBounds().width / 3.f, -5});
+        number.setOutlineThickness(2.f);
+
+        _curWin.draw(roomrect);
+        _curWin.draw(number);
+    }
+
 }

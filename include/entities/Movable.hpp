@@ -11,6 +11,7 @@ class Movable : public Entity
     // пока что это не нужно
 
   protected:
+    int bounty = 0;
     float _SIZE = 50;
     float _MAXSPEEDABS = 400;
     float _ACCABS = 1500;
@@ -42,6 +43,8 @@ class Movable : public Entity
     virtual void move(float delta);
     virtual void stop(float delta, sf::Vector2f def);
     virtual void setPos(float x, float y);
+
+    int getBounty() const;
 };
 
 }

@@ -9,9 +9,11 @@ class Gamer : public Movable
 {
     sf::ConvexShape _sprite, _hitbox;
     float shotCD = 0;
+    int maxHP;
 
   public:
     bool isShooting = false;
+    int score = 0;
 
     Gamer(float x, float y);
     Gamer();
@@ -24,6 +26,9 @@ class Gamer : public Movable
     void move(float delta) override;
     void stop(float delta, sf::Vector2f def) override;
     void setPos(float x, float y) override;
+    
+    int getMaxHp() const;
+
     std::unique_ptr<Entity> copy() const override;
     std::optional<std::unique_ptr<game::Movable>> shot(float delta);
 };

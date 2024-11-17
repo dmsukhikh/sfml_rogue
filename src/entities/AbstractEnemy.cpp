@@ -151,3 +151,4 @@ void game::AbstractEnemy::setPanicPoint(
     }
     panicCD += delta;
 }
+

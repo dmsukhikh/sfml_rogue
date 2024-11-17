@@ -88,3 +88,7 @@ uint16_t game::Movable::getHp() const
     return _hp;
 }
 
+int game::Movable::getBounty() const
+{
+    return bounty;
+}

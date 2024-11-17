@@ -32,15 +32,17 @@ class MapManager
     std::mt19937 _gen;
     std::uniform_int_distribution<int> _randmap;
 
-    const uint32_t LEVELNUM = 10;
-
+    int endPoint;
     std::vector<Map> level;
     std::vector<Map> pool; 
 
   public:
+    const uint32_t LEVELNUM = 10;
+    std::vector<std::vector<int>> curGraph;
     MapManager();
     void generateNewLevel();
     Map& getRoom(uint32_t idx);
+    int getEndPoint() const;
 };
 
 }
