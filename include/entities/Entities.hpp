@@ -9,4 +9,5 @@
 #include "Bigboy.hpp"
 #include "Wolf.hpp"
 #include "Wizard.hpp"
+#include "Item.hpp"
 

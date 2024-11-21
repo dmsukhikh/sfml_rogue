@@ -24,6 +24,12 @@ struct Map
     std::vector<std::vector<int>> _adjList;
     std::vector<sf::Vector2f> _mapCoords;
     std::vector<std::unique_ptr<Entity>> _data;
+
+    bool withItems = false;
+    std::vector<sf::Vector2f> _itemCoords;
+    std::vector<std::unique_ptr<Item>> _itemData;
+
+    void activateItems();
 };
 
 class MapManager

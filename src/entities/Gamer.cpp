@@ -2,6 +2,7 @@
 #include "../../include/vecmath.hpp"
 #include <SFML/System/Vector2.hpp>
 #include "../../include/entities/Bullets.hpp"
+#include "../../include/entities/Item.hpp"
 #include <cmath>
 #include <memory>
 #include <cstdlib>
@@ -20,6 +21,11 @@ game::Gamer::Gamer(float x, float y) : Movable(x, y)
     maxHP = 10;
     _hp = maxHP;
     type = game::EntityType::Gamer;
+
+    for (int i = 0; i < Item::ITEMSCOUNT; ++i)
+    {
+        items[i] = 0;
+    }
 }
 
 game::Gamer::Gamer() : game::Gamer(0, 0) {}
@@ -56,7 +62,81 @@ void game::Gamer::move(float delta)
     _sprite.move(_speed*delta);
     _hitbox.move(_speed*delta);
 
-    shotCD += delta;
+    // В моем коде есть соглашение, согласно которому всякий update происходит 
+    // в функции move
+    shotCDclock += delta;
+
+    for (auto &[k, v]: items)
+    {
+        switch (k)
+        {
+            case Item::ADD_HP:
+                maxHP++;
+                _hp++;
+                break;
+
+            case Item::SPEED_UP:
+                _MAXSPEEDABS = _MAXSPEEDABS * (1 + 0.1 * items[Item::SPEED_UP]);
+                _SLOWDOWNABS = _SLOWDOWNABS * (1 + 0.1 * items[Item::SPEED_UP]);
+                _ACCABS = _ACCABS * (1 + 0.1 * items[Item::SPEED_UP]);
+                break;
+
+            case Item::SHOOTSPEED_UP:
+                shotCD = shotCD * (std::pow(0.9, items[Item::SHOOTSPEED_UP]));
+                break;
+
+            case Item::HEALING:
+                if (maxHP - _hp > 0)
+                {
+                    _hp++;
+                }
+                break;
+
+            case Item::DAMAGE_UP:
+                plainDamage++;
+                break;
+
+            case Item::ULT_IMPROVE:
+                // будет в будущем
+                break;
+            
+            case Item::DASH_IMPROVE:
+                // будет в будущем
+                break;
+
+            case Item::POISON:
+                poisonProb += 0.1;
+                break;
+
+            case Item::SHOCK:
+                shockProb += 0.05;
+                break;
+
+            case Item::EXPLODE:
+                explodeProb += 0.1;
+                break;
+
+            case Item::LAZER:
+                if (withLazer)
+                {
+                    lazerCD = lazerCD * (std::pow(0.9, items[Item::LAZER]));
+                }
+                withLazer = true;
+                break;
+
+            case Item::NEW_LIVE:
+                lives++;
+                break;
+
+            case Item::VAMPIRE:
+                // все будет
+                break;
+
+            default:
+                break;
+        }
+        --v;
+    }
 }
 
 
@@ -92,9 +172,9 @@ void game::Gamer::stop(float delta, sf::Vector2f def)
 
 std::optional<std::unique_ptr<game::Movable>> game::Gamer::shot(float delta)
 {
-    if (shotCD > 0.2)
+    if (shotCDclock > shotCD)
     {
-        shotCD = 0;
+        shotCDclock = 0;
         auto ret = std::make_unique<game::GamerShot>(getPos().x, getPos().y);
         ret->rotate(_angle);
         ret->masterType = EntityType::Gamer;
@@ -104,3 +184,8 @@ std::optional<std::unique_ptr<game::Movable>> game::Gamer::shot(float delta)
 }
 
 int game::Gamer::getMaxHp() const { return maxHP; }
+
+void game::Gamer::addItem(Item::ItemType itype)
+{
+    items[static_cast<int>(itype)]++;
+}

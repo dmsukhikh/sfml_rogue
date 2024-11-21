@@ -22,6 +22,8 @@ enum class EntityType
     Gamer,
     Enemy,
     LevelPort,
+    Item,
+    DisabledItem,
     None
 };
 

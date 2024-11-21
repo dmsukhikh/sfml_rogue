@@ -1,15 +1,21 @@
 #include "Movable.hpp"
+#include "Item.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <memory>
 #include <optional>
+#include <map>
 
 namespace game
 {
 class Gamer : public Movable
 {
     sf::ConvexShape _sprite, _hitbox;
-    float shotCD = 0;
-    int maxHP;
+    std::map<int, int> items;
+    float shotCD = 0.4, lazerCD = 0.5;
+    float shotCDclock = 0;
+    int maxHP, lives = 0, plainDamage = 1;
+    float poisonProb = 0, explodeProb = 0, shockProb = 0;
+    bool withLazer = false;
 
   public:
     bool isShooting = false;
@@ -28,6 +34,7 @@ class Gamer : public Movable
     void setPos(float x, float y) override;
     
     int getMaxHp() const;
+    void addItem(Item::ItemType itype);
 
     std::unique_ptr<Entity> copy() const override;
     std::optional<std::unique_ptr<game::Movable>> shot(float delta);

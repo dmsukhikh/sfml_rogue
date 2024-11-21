@@ -16,12 +16,20 @@ game::Map::Map(const Map &op)
     {
         _data.push_back(i->copy());
     }
+
+    for (auto &&i: op._itemData)
+    {
+        _itemData.push_back(std::make_unique<Item>(*i));
+    }
+
     isLvlPort = op.isLvlPort;
     _lvlPortIdx = op._lvlPortIdx;
     _unlinkedPorts = op._unlinkedPorts;
     _linkedPorts = op._linkedPorts;
     _adjList = op._adjList;
     _mapCoords = op._mapCoords;
+    _itemCoords = op._itemCoords;
+    withItems = op.withItems;
     width = op.width;
     height = op.height;
 } 
@@ -80,10 +88,12 @@ game::MapManager::MapManager() : _gen(_rd())
                         tempmap._data.push_back(std::make_unique<game::Wall>(
                             (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         break;
+
                     case '.':
                         tempmap._data.push_back(std::make_unique<game::Floor>(
                             (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         break;
+
                     case 'P':
                         tempmap._data.push_back(std::make_unique<game::Port>(
                             (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
@@ -94,6 +104,12 @@ game::MapManager::MapManager() : _gen(_rd())
                         tempmap._data.push_back(std::make_unique<game::LevelPort>(
                             (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
                         tempmap._lvlPortIdx = tempmap._data.size() - 1;
+                        break;
+
+                    case 'I':
+                        tempmap._data.push_back(std::make_unique<game::Floor>(
+                            (x+0.5) * Entity::BLOCK_SIZE, (y+0.5) * Entity::BLOCK_SIZE));
+                        tempmap._itemCoords.push_back({x*1.f, y*1.f});
                         break;
 
                     default:
@@ -210,6 +226,22 @@ void game::MapManager::generateNewLevel()
     {
         i.removeUnlinkedPorts();
     }
+
+    // Генерация айтемов
+    for (auto &i: level)
+    {
+        std::uniform_int_distribution<int> randItem(0, Item::ITEMSCOUNT - 1);
+        std::uniform_real_distribution<float> itemProb;
+        if (itemProb(_gen) <= 1.2)
+        {
+            for (auto &pos : i._itemCoords)
+            {
+                i.withItems = true;
+                Item::ItemType r = static_cast<Item::ItemType>(randItem(_gen));
+                i._itemData.push_back(std::make_unique<Item>(pos.x, pos.y, r));
+            }
+        }
+    }
 }
 
 game::Map &game::MapManager::getRoom(uint32_t idx)
@@ -222,3 +254,11 @@ game::Map &game::MapManager::getRoom(uint32_t idx)
 }
 
 int game::MapManager::getEndPoint() const { return endPoint; }
+
+void game::Map::activateItems()
+{
+    for (auto &i: _itemData)
+    {
+        i->activate();
+    }
+}

@@ -281,6 +281,11 @@ void game::Game::_showObjects()
         i->show(_curWin);
     }
 
+    for (const auto &i: mapManager.getRoom(room)._itemData)
+    {
+        i->show(_curWin);
+    }
+
     for (const auto &i: onMapEntities)
     {
         i->show(_curWin);
@@ -331,6 +336,7 @@ void game::Game::_ingameHandling(float delta)
         }
     }
 
+
     for (auto it = onMapEntities.begin(); it != onMapEntities.end(); it++)
     {
         if ((*it)->collide(gamer))
@@ -343,6 +349,17 @@ void game::Game::_ingameHandling(float delta)
             {
                 (*it)->collideHandling(*(*j));
             }
+        }
+    }
+
+    // Обработка коллизии с предметами. Можно выбрать только один из нескольких
+    for (auto &i: mapManager.getRoom(room)._itemData)
+    {
+        if (gamer.collide(*i) && i->getType() == EntityType::Item)
+        {
+            gamer.addItem(i->itemType);
+            mapManager.getRoom(room)._itemData.clear();
+            break;
         }
     }
     
@@ -411,6 +428,7 @@ void game::Game::_ingameHandling(float delta)
         if (!enemycnt)
         {
             mapManager.getRoom(room).isCleared = true;
+            mapManager.getRoom(room).activateItems();
             _activatePorts();
         }
     }
@@ -633,12 +651,25 @@ void game::Game::_showMinimap()
         
         sf::Text number(std::to_string(i), _hudfont, 40);
         number.setPosition(
-            roomrect.getPosition() +
-            sf::Vector2f{roomrect.getLocalBounds().width / 3.f, -5});
+            roomrect.getPosition() + roomrect.getSize() / 2.f -
+            sf::Vector2f{number.getLocalBounds().width * 0.5f,
+                         1.75f * number.getGlobalBounds().height});
+
+        // точка основы зависит от шрифта тупого блин((
         number.setOutlineThickness(2.f);
+        if (mapManager.getRoom(i).withItems)
+        {
+            number.setFillColor(sf::Color::Yellow);
+        }
 
         _curWin.draw(roomrect);
         _curWin.draw(number);
     }
 
+    std::string temp = "Level: " + std::to_string(level);
+    sf::Text lvlhud(temp, _hudfont);
+    lvlhud.setOrigin({lvlhud.getLocalBounds().width * 0.2f, 0});
+    lvlhud.setPosition(cam.getCenter() -
+                       sf::Vector2f{0, cam.getSize().y / 2.f - 20}); 
+    _curWin.draw(lvlhud);
 }
