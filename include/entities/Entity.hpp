@@ -20,10 +20,12 @@ enum class EntityType
     Port,
     Shot,
     Gamer,
+    DashedGamer,
     Enemy,
     LevelPort,
     Item,
     DisabledItem,
+    GamerUlt,
     None
 };
 

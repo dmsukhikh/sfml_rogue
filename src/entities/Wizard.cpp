@@ -55,7 +55,7 @@ void game::Wizard::setPos(float x, float y)
 
 std::optional<std::unique_ptr<game::Movable>> game::Wizard::shot(float delta)
 {
-    if (shotCD >= 2 + addshotCD)
+    if (shotCD >= 2 + addshotCD && !hasShocked)
     {
         shotCD = 0;
         addshotCD = randShotCD(gen);

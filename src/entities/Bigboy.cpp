@@ -106,7 +106,7 @@ void game::Bigboy::collideHandling(game::Movable &op)
         switch (op.getType())
         {
             case game::EntityType::Gamer:
-                if (damageCD > 1)
+                if (damageCD > 1 && !hasShocked)
                 {
                     damageCD = 0;
                     op.decreaseHp(1);

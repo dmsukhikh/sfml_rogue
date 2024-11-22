@@ -96,7 +96,7 @@ void game::Striker::stop(float delta, sf::Vector2f def)
 
 std::optional<std::unique_ptr<game::Movable>> game::Striker::shot(float delta)
 {
-    if (shotCD >= 1 + addshotCD)
+    if (shotCD >= 1 + addshotCD && !hasShocked)
     {
         shotCD = 0;
         addshotCD = randShotCD(gen);

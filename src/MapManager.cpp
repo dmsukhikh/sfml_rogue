@@ -232,7 +232,7 @@ void game::MapManager::generateNewLevel()
     {
         std::uniform_int_distribution<int> randItem(0, Item::ITEMSCOUNT - 1);
         std::uniform_real_distribution<float> itemProb;
-        if (itemProb(_gen) <= 1.2)
+        if (itemProb(_gen) <= 0.4)
         {
             for (auto &pos : i._itemCoords)
             {

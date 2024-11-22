@@ -2,13 +2,17 @@
 #include "../../include/vecmath.hpp"
 #include <SFML/System/Vector2.hpp>
 #include "../../include/entities/Bullets.hpp"
+#include "../../include/entities/Lazer.hpp"
 #include "../../include/entities/Item.hpp"
 #include <cmath>
 #include <memory>
 #include <cstdlib>
+#include <iostream>
 
 
-game::Gamer::Gamer(float x, float y) : Movable(x, y)
+std::random_device game::Gamer::r{};
+
+game::Gamer::Gamer(float x, float y) : Movable(x, y), gen(r())
 {
     _sprite.setPointCount(3);
     _sprite.setPoint(0, {0, _SIZE*fsqrt(3)/2});
@@ -21,6 +25,8 @@ game::Gamer::Gamer(float x, float y) : Movable(x, y)
     maxHP = 10;
     _hp = maxHP;
     type = game::EntityType::Gamer;
+
+    AbstractShot::setGamer(this);
 
     for (int i = 0; i < Item::ITEMSCOUNT; ++i)
     {
@@ -57,7 +63,30 @@ void game::Gamer::rotate(float x, float y)
 }
 
 void game::Gamer::move(float delta)
-{
+{   
+    if (isDashed)
+    {
+        type = EntityType::DashedGamer;
+        inDashClock += delta;
+
+        auto col = _sprite.getFillColor();
+        col.a = 160;
+        _sprite.setFillColor(col);
+
+        if (inDashClock >= 0.3f)
+        {
+            inDashClock = 0;
+            _MAXSPEEDABS /= 2.f;
+            type = EntityType::Gamer;
+            dashCDClock = 0;
+            isDashed = false;
+
+            auto col = _sprite.getFillColor();
+            col.a = 255;
+            _sprite.setFillColor(col);
+        }
+    }
+
     game::Movable::move(delta);
     _sprite.move(_speed*delta);
     _hitbox.move(_speed*delta);
@@ -65,11 +94,20 @@ void game::Gamer::move(float delta)
     // В моем коде есть соглашение, согласно которому всякий update происходит 
     // в функции move
     shotCDclock += delta;
+    if (getDashCharge() < 100) dashCDClock += delta;
+    if (withVampirism && vampireCnt >= vampireLimit && _hp < maxHP)
+    {
+        vampireCnt = 0;
+        _hp++;
+    }
+
 
     for (auto &[k, v]: items)
     {
-        switch (k)
+        if (v > 0)
         {
+            switch (k)
+            {
             case Item::ADD_HP:
                 maxHP++;
                 _hp++;
@@ -99,9 +137,9 @@ void game::Gamer::move(float delta)
             case Item::ULT_IMPROVE:
                 // будет в будущем
                 break;
-            
+
             case Item::DASH_IMPROVE:
-                // будет в будущем
+                dashCD *= 0.75;
                 break;
 
             case Item::POISON:
@@ -109,7 +147,7 @@ void game::Gamer::move(float delta)
                 break;
 
             case Item::SHOCK:
-                shockProb += 0.05;
+                shockProb += 0.1;
                 break;
 
             case Item::EXPLODE:
@@ -121,7 +159,11 @@ void game::Gamer::move(float delta)
                 {
                     lazerCD = lazerCD * (std::pow(0.9, items[Item::LAZER]));
                 }
-                withLazer = true;
+                else
+                {
+                    lazerCD = 5 * shotCD;
+                    withLazer = true;
+                }
                 break;
 
             case Item::NEW_LIVE:
@@ -129,13 +171,18 @@ void game::Gamer::move(float delta)
                 break;
 
             case Item::VAMPIRE:
-                // все будет
+                if (!withVampirism) withVampirism = true;
+                else
+                {
+                    vampireLimit -= 5;
+                }
                 break;
 
             default:
                 break;
+            }
+            --v;
         }
-        --v;
     }
 }
 
@@ -172,13 +219,46 @@ void game::Gamer::stop(float delta, sf::Vector2f def)
 
 std::optional<std::unique_ptr<game::Movable>> game::Gamer::shot(float delta)
 {
-    if (shotCDclock > shotCD)
+    if (!withLazer)
     {
-        shotCDclock = 0;
-        auto ret = std::make_unique<game::GamerShot>(getPos().x, getPos().y);
-        ret->rotate(_angle);
-        ret->masterType = EntityType::Gamer;
-        return ret;
+        if (shotCDclock > shotCD)
+        {
+            shotCDclock = 0;
+            auto ret = std::make_unique<game::Shot>(getPos().x, getPos().y);
+            ret->col = sf::Color::Green;
+            ret->rotate(_angle);
+            ret->setSpeed(1500);
+            ret->masterType = EntityType::Gamer;
+            ret->damage = plainDamage;
+
+            float prob = randProb(gen);
+            if (prob < shockProb) ret->hasShocked = true;
+            if (prob < explodeProb) ret->hasExplosive = true;
+            if (prob < poisonProb) ret->hasPoisoned = true;
+
+            return ret;
+        }
+    }
+    else
+    {
+        if (shotCDclock > lazerCD)
+        {
+            shotCDclock = 0;
+            auto ret = std::make_unique<game::Lazer>(
+                game::Lazer::getLazer(getPos(), _angle));
+            ret->appearingCol = sf::Color::Green;
+            ret->damagingCol = {220, 255, 220};
+            ret->masterType = EntityType::Gamer;
+            ret->damage = plainDamage;
+
+            float prob = randProb(gen);
+            if (prob < shockProb) ret->hasShocked = true;
+            if (prob < explodeProb) ret->hasExplosive = true;
+            if (prob < poisonProb) ret->hasPoisoned = true;
+
+            return ret;
+        }
+ 
     }
     return std::nullopt;
 }
@@ -188,4 +268,33 @@ int game::Gamer::getMaxHp() const { return maxHP; }
 void game::Gamer::addItem(Item::ItemType itype)
 {
     items[static_cast<int>(itype)]++;
+}
+
+bool game::Gamer::getVampirism() const
+{
+    return withVampirism;
+}
+
+void game::Gamer::dash()
+{
+    if (dashCDClock >= dashCD)
+    {
+        dashCDClock = 0;
+        if (vabs(_speed) < 10e-4)
+        {
+            _speed = {-std::cos(_angle), std::sin(_angle)};
+            _speed *= 2*_MAXSPEEDABS;
+        }
+        else
+        {
+            _speed *= 2 * _MAXSPEEDABS / vabs(_speed);
+        }
+        _MAXSPEEDABS *= 2;
+        isDashed = true;
+    }
+}
+
+int game::Gamer::getDashCharge() const
+{
+    return 100 * (dashCDClock / dashCD);
 }

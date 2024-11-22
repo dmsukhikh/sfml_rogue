@@ -1,21 +1,24 @@
 #pragma once
 #include "Movable.hpp"
+#include "Bullets.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <memory>
+#include <map>
 
 namespace game
 {
-class Fireball : public Movable
+class Fireball : public AbstractShot 
 {
     sf::CircleShape _sprite;
     float lifetime = 0;
-    float cd = 1.5;
     bool isDamageable = false, isMoving = true;
     void _explode();
+    std::map<int, float> damageCDs;
 
   public:
     static const float movingTime, beatingTime;
+    sf::Color col = sf::Color::Red;
 
     // Иметь публичные конструкторы - эщкере или не эщкере, если есть фабрика?
     Fireball(float x, float y);

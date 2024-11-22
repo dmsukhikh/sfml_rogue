@@ -3,14 +3,13 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
-#include <iostream>
 #include <cmath>
 #include <memory>
 
 const float game::Fireball::movingTime = 5;
 const float game::Fireball::beatingTime = 5;
 
-game::Fireball::Fireball(float x, float y) : Movable(x, y)
+game::Fireball::Fireball(float x, float y) : AbstractShot(x, y)
 {
     _MAXSPEEDABS = 150;
     _sprite = sf::CircleShape(BLOCK_SIZE);
@@ -50,6 +49,7 @@ std::unique_ptr<game::Entity> game::Fireball::copy() const
 
 void game::Fireball::move(float delta) 
 {
+    _sprite.setFillColor(col);
     if (isMoving)
     {
         _speed = _MAXSPEEDABS * sf::Vector2f{std::cos(_angle / RADTODEG),
@@ -79,7 +79,7 @@ void game::Fireball::move(float delta)
         isExisted = false;
     }
 
-    cd += delta;
+    for (auto &[k, v]: damageCDs) v += delta;
     lifetime += delta;
 }
 
@@ -95,52 +95,29 @@ void game::Fireball::collideHandling(Entity &op)
 
 void game::Fireball::collideHandling(Movable &op) 
 {
-    if (collide(op))
+    if (isExisted && collide(op))
     {
-        switch (op.getType())
+        if (damageCDs.find(op.getId()) == damageCDs.end())
         {
-            case game::EntityType::Gamer:
-                if (masterType != EntityType::Gamer)
-                {
-                    if (isMoving) 
-                    {
-                        _explode();
-                        lifetime = movingTime;
-                    }
-                    else 
-                    {
-                        if (cd > 1.5) 
-                        {
-                            op.decreaseHp(1);
-                            cd = 0;
-                        }
-                    }
-                }
-                break;
+            damageCDs[op.getId()] = cd;
+        }
 
-            case game::EntityType::Enemy:
-                if (masterType != EntityType::Enemy)
+        if (op.getType() != masterType && op.masterType != EntityType::Gamer &&
+            op.getType() != EntityType::DashedGamer)
+        {
+            if (isMoving)
+            {
+                _explode();
+                lifetime = movingTime;
+            }
+            else
+            {
+                if (damageCDs[op.getId()] >= cd)
                 {
-                    if (isMoving) 
-                    {
-                        _explode();
-                        lifetime = movingTime;
-                    }
-                    else 
-                    {
-                        if (cd > 1.5) 
-                        {
-                            op.decreaseHp(1);
-                            cd = 0;
-                        }
-                        if (!op.getHp()) op.isExisted = false; 
-                    }
-                    std::cout << op.getHp() << std::endl;
+                    giveDamage(op);
+                    damageCDs[op.getId()] = 0;
                 }
-                break;
-
-            default:
-                break;
+            }
         }
     }
 }

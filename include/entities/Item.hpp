@@ -11,19 +11,19 @@ class Item : public Entity
   public:
     enum ItemType
     {
-        SPEED_UP = 0,
-        SHOOTSPEED_UP,
-        ADD_HP,
-        DAMAGE_UP,
-        DASH_IMPROVE,
-        ULT_IMPROVE,
-        SHOCK,
-        VAMPIRE,
-        LAZER,
-        EXPLODE,
-        POISON,
-        NEW_LIVE,
-        HEALING
+        SPEED_UP = 0,    // done
+        SHOOTSPEED_UP,   // done
+        ADD_HP,          // done
+        DAMAGE_UP,       // done
+        DASH_IMPROVE,    // 
+        ULT_IMPROVE,     //
+        SHOCK,           // done
+        VAMPIRE,         // done
+        LAZER,           // done
+        EXPLODE,         // done
+        POISON,          // 
+        NEW_LIVE,        // done
+        HEALING          // done
     };
 
     static const size_t ITEMSCOUNT;

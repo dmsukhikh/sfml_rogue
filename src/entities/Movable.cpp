@@ -4,7 +4,16 @@
 #include <cmath>
 #include <cstdint>
 
-game::Movable::Movable(float x, float y) : Entity(x, y) {}
+int game::Movable::IDGEN = 0;
+float game::Movable::SHOCKCD = 3.f;
+float game::Movable::POISONCD = 1.f;
+float game::Movable::POISONLIMIT = 3;
+
+
+game::Movable::Movable(float x, float y) : Entity(x, y) 
+{
+    id = IDGEN++;
+}
 game::Movable::Movable() : game::Movable(0, 0) {}
 
 void game::Movable::rotate(float x, float y)
@@ -22,6 +31,35 @@ void game::Movable::rotate(float angle)
 
 void game::Movable::move(float delta)
 {
+    if (hasShocked)
+    {
+        _xmovement = 0;
+        _ymovement = 0;
+        shockClock += delta;
+        if (shockClock >= SHOCKCD)
+        {
+            shockClock = 0;
+            hasShocked = false;
+        }
+    }
+
+    if (hasPoisoned)
+    {
+        poisonClock += delta;
+        if (poisonClock >= POISONCD)
+        {
+            poisonClock = 0;
+            poisonDamage += 1;
+            _hp -= 1;
+            if (_hp == 0) isExisted = false;
+            if (poisonDamage == POISONLIMIT)
+            {
+                poisonDamage = 0;
+                hasPoisoned = true;
+            }
+        }
+    }
+
     _speed.x = _speed.x + sgn(_xmovement)*_ACCABS*delta;
     _speed.y = _speed.y + sgn(_ymovement)*_ACCABS*delta;
 
@@ -74,8 +112,10 @@ void game::Movable::collideHandling(Movable &op) {}
 
 void game::Movable::decreaseHp(uint16_t i)
 {
-    if (i > _hp) _hp = 0;
-    else _hp -= i;
+    if (i > _hp)
+        _hp = 0;
+    else
+        _hp -= i;
 }
 
 float game::Movable::getAngle() const
@@ -91,4 +131,14 @@ uint16_t game::Movable::getHp() const
 int game::Movable::getBounty() const
 {
     return bounty;
+}
+
+int game::Movable::getId() const
+{
+    return id;
+}
+
+sf::Vector2f game::Movable::getSpeed() const
+{
+    return _speed;
 }

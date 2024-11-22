@@ -92,7 +92,7 @@ std::optional<std::unique_ptr<game::Movable>> game::Sniper::shot(float delta)
         isAiming = true;
     }
 
-    if (shotCD >= 4 + addshotCD)
+    if (shotCD >= 4 + addshotCD && !hasShocked)
     {
         shotCD = 0;
         addshotCD = randShotCD(gen);

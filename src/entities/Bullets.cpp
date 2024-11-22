@@ -3,12 +3,23 @@
 #include "../../include/vecmath.hpp"
 #include <cmath>
 
-game::Shot::Shot(float x, float y) : Movable(x, y)
+game::Gamer *game::AbstractShot::gamerLink = nullptr;
+
+void game::AbstractShot::setGamer(game::Gamer *newGamer)
+{
+    gamerLink = newGamer;
+}
+
+game::AbstractShot::AbstractShot(float x, float y) : Movable(x, y) {}
+
+game::AbstractShot::AbstractShot() : game::AbstractShot(0, 0) {}
+
+game::Shot::Shot(float x, float y) : AbstractShot(x, y)
 {
     _sprite = sf::RectangleShape({10.f, 5.f});
     _sprite.setOrigin({10.f, 2.5f});
     _sprite.setFillColor(sf::Color::Red);
-    _speed = {400.f, 400.f};
+    _speed = {_MAXSPEEDABS, _MAXSPEEDABS};
     _sprite.setPosition(x, y);
     type = EntityType::Shot;
 }
@@ -42,6 +53,7 @@ std::unique_ptr<game::Entity> game::Shot::copy() const
 
 void game::Shot::move(float delta) 
 {
+    _sprite.setFillColor(col);
     _x += _speed.x*delta;
     _y += _speed.y*delta;
     _sprite.move(_speed*delta);
@@ -52,7 +64,7 @@ void game::Shot::rotate(float angle)
     game::Movable::rotate(angle);
     _speed = {_speed.x * std::cos(_angle / RADTODEG),
               _speed.y * std::sin(_angle / RADTODEG)};
-    _sprite.rotate(_angle);
+    _sprite.setRotation(_angle);
 }
 
 void game::Shot::collideHandling(Entity &op)
@@ -77,40 +89,30 @@ void game::Shot::collideHandling(Entity &op)
 
 void game::Shot::collideHandling(Movable &op)
 {
-    if (isExisted && collide(op))
+    if (isExisted && collide(op) && op.getType() != masterType &&
+        op.getType() != EntityType::DashedGamer)
     {
-        switch (op.getType())
-        {
-        case game::EntityType::Gamer:
-            if (masterType != EntityType::Gamer)
-            {
-                op.decreaseHp(1);
-                isExisted = false;
-            }
-            break;
-
-        case game::EntityType::Enemy:
-            if (masterType != EntityType::Enemy)
-            {
-                op.decreaseHp(1);
-                if (op.getHp() == 0)
-                    op.isExisted = false;
-                isExisted = false;
-            }
-            break;
-
-        default:
-            break;
-        }
+        giveDamage(op);
+        isExisted = false;
     }
 }
  
-// ---
-
-game::GamerShot::GamerShot(float x, float y) : Shot(x, y)
+void game::Shot::setSpeed(float maxSpeedAbs)
 {
-    _speed = {1200.f, 1200.f};
-    _sprite.setFillColor(sf::Color::Green);
+    _speed = {maxSpeedAbs, maxSpeedAbs};
+    _MAXSPEEDABS = maxSpeedAbs;
+    rotate(_angle);
 }
 
-game::GamerShot::GamerShot() : game::GamerShot(0, 0) {}
+void game::AbstractShot::giveDamage(game::Movable &op)
+{
+    if (hasShocked) op.hasShocked = true;
+    if (hasPoisoned) op.hasPoisoned = true;
+    op.decreaseHp(damage);
+    if (masterType == EntityType::Gamer && gamerLink->getVampirism())
+    {
+        gamerLink->vampireCnt++;
+    }
+    if (op.getHp() == 0)
+        op.isExisted = false;
+}

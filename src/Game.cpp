@@ -225,7 +225,7 @@ void game::Game::_inputHandling()
             }
             else if (ev.key.code == sf::Keyboard::Space)
             {
-                gamer.isShooting = true;
+                gamer.dash();
             }
             else if (ev.key.code == sf::Keyboard::Tab)
             {
@@ -255,10 +255,6 @@ void game::Game::_inputHandling()
                 _keyMoveDownIsPressed = false;
                 gamer._ymovement = _keyMoveUpIsPressed ? -1 : 0;
             }
-            else if (ev.key.code == sf::Keyboard::Space)
-            {
-                gamer.isShooting = false;
-            }
             else if (ev.key.code == sf::Keyboard::Tab)
             {
                 _isMinimapShowed = false;
@@ -268,6 +264,22 @@ void game::Game::_inputHandling()
         if (ev.type == sf::Event::MouseMoved)
         {
             _view = {ev.mouseMove.x, ev.mouseMove.y};
+        }
+
+        if (ev.type == sf::Event::MouseButtonPressed)
+        {
+            if (ev.mouseButton.button == sf::Mouse::Left)
+            {
+                gamer.isShooting = true;
+            }
+        }
+
+        if (ev.type == sf::Event::MouseButtonReleased)
+        {
+            if (ev.mouseButton.button == sf::Mouse::Left)
+            {
+                gamer.isShooting = false;
+            }
         }
     }
 }
@@ -315,7 +327,6 @@ void game::Game::_ingameHandling(float delta)
 
                 case game::EntityType::Port:
                     _initializeRoom(reinterpret_cast<Port &>(*i).getIdx());
-                    std::cout << room << std::endl;
                     break;
 
                 case game::EntityType::LevelPort:
@@ -370,6 +381,15 @@ void game::Game::_ingameHandling(float delta)
         auto shot = gamer.shot(delta);
         if (shot.has_value())
         {
+            if (shot.value()->hasExplosive)
+            {
+                auto exp = std::make_unique<Fireball>(shot.value()->getPos().x,
+                                                      shot.value()->getPos().y);
+                exp->rotate(gamer.getAngle());
+                exp->masterType = EntityType::Gamer;
+                exp->col = sf::Color::Green;
+                onMapEntities.push_back(std::move(exp));
+            }
             onMapEntities.push_back(std::move(shot.value()));
         }
     }
@@ -442,7 +462,7 @@ void game::Game::_ingameHandling(float delta)
         }
     }
 
-    if (gamer.getHp() == 0)
+    if (gamer.getHp() == 0 && gamer.lives-- == 0)
     {
         std::cout << "Final score: " << gamer.score << std::endl;
         _gameIsRunning = false;
@@ -583,9 +603,18 @@ void game::Game::_showGameHUD()
     hudscore.setOutlineColor(sf::Color::Black);
     hudscore.setOutlineThickness(2.f);
 
+    tempstr = "dash: " + std::to_string(gamer.getDashCharge()) + "%";
+    sf::Text huddash(tempstr, _hudfont, 30);
+    huddash.setPosition(
+        cam.getCenter() +
+        sf::Vector2f{cam.getSize().x / 2.f - 230, cam.getSize().y / 3.f + 100});
+    huddash.setFillColor(sf::Color::Red);
+    huddash.setOutlineColor(sf::Color::Black);
+    huddash.setOutlineThickness(2.f);
+
     _curWin.draw(hudhp);
     _curWin.draw(hudscore);
-
+    _curWin.draw(huddash);
 }
 
 

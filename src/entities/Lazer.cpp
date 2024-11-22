@@ -52,7 +52,7 @@ game::Lazer::getLazer(sf::Vector2f pos, float angle)
 }
 
     game::Lazer::Lazer(float x, float y)
-    : Movable(x, y)
+    : AbstractShot(x, y)
 {
     type = EntityType::Shot;
 }
@@ -92,13 +92,14 @@ void game::Lazer::move(float delta)
     // Работает скорее как update
     if (lifetime <= appearingTime)
     {
+        _sprite.setFillColor(appearingCol);
         _sprite.setScale({1.f, 2.f*std::pow(lifetime/appearingTime, 0.5f)});
     }
 
     else if (lifetime >= appearingTime &&
         lifetime - appearingTime <= beatingTime)
     {
-        auto col = sf::Color::White;
+        auto col = damagingCol;
         col.a = 255 - 255 * std::pow((lifetime-appearingTime)/beatingTime, 2);
         _sprite.setFillColor(col);
     }
@@ -108,13 +109,8 @@ void game::Lazer::move(float delta)
         isExisted = false;
     }
 
-    if (cd >= 0.7)
-    {
-        isDamageable = true;
-    }
-
+    for (auto &[k, v]: damageCDs) v += delta;
     lifetime += delta;
-    cd += delta; 
 }
 
 void game::Lazer::rotate(float angle)
@@ -129,32 +125,19 @@ void game::Lazer::collideHandling(Entity &op) {}
 
 void game::Lazer::collideHandling(Movable &op)
 {
-    if (isExisted && isDamageable && cd > 0.7 && collide(op))
+    if (isExisted && collide(op))
     {
-        switch (op.getType())
+        if (damageCDs.find(op.getId()) == damageCDs.end())
         {
-        case game::EntityType::Gamer:
-            if (masterType != EntityType::Gamer)
-            {
-                cd = 0;
-                isDamageable = false;
-                op.decreaseHp(1);
-            }
-            break;
+            damageCDs[op.getId()] = cd;
+        }
 
-        case game::EntityType::Enemy:
-            if (masterType != EntityType::Enemy)
-            {
-                cd = 0;
-                isDamageable = false;
-                op.decreaseHp(1);
-                if (op.getHp() == 0)
-                    op.isExisted = false;
-            }
-            break;
-
-        default:
-            break;
+        if (op.getType() != masterType && damageCDs[op.getId()] >= cd &&
+            lifetime >= appearingTime && op.getType() != EntityType::DashedGamer)
+        {
+            giveDamage(op);
+            damageCDs[op.getId()] = 0;
         }
     }
 }
+

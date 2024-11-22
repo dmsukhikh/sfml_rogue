@@ -35,9 +35,8 @@ class AbstractEnemy : public Movable
     void setPanicPoint(const std::vector<std::unique_ptr<game::Entity>> &bob,
                        sf::Vector2f gamerPos, float delta);
 
-    virtual std::optional<std::unique_ptr<game::Movable>> shot(float delta) = 0;
     virtual void processMoving(sf::Vector2f gamerPos) = 0;
-
+    virtual std::optional<std::unique_ptr<game::Movable>> shot(float delta) = 0;
 };
 
 } // namespace game
