@@ -230,15 +230,45 @@ void game::MapManager::generateNewLevel()
     // Генерация айтемов
     for (auto &i: level)
     {
-        std::uniform_int_distribution<int> randItem(0, Item::ITEMSCOUNT - 1);
+        std::vector<int> commonItems = {Item::ADD_HP,   Item::DAMAGE_UP,
+                                        Item::HEALING,  Item::SHOOTSPEED_UP,
+                                        Item::SPEED_UP, Item::SHOCK},
+                         uncommonItems = {Item::LAZER, Item::ULT_IMPROVE,
+                                          Item::DASH_IMPROVE, Item::POISON,
+                                          Item::VAMPIRE},
+                         rareItems = {Item::NEW_LIVE};
+
+        std::uniform_int_distribution<int> randCommon(0, commonItems.size() - 1),
+            randUncommon(0, uncommonItems.size() - 1),
+            randRare(0, rareItems.size() - 1);
         std::uniform_real_distribution<float> itemProb;
-        if (itemProb(_gen) <= 0.4)
+
+        if (itemProb(_gen) < 0.4)
         {
+            i.withItems = true;
             for (auto &pos : i._itemCoords)
             {
-                i.withItems = true;
-                Item::ItemType r = static_cast<Item::ItemType>(randItem(_gen));
-                i._itemData.push_back(std::make_unique<Item>(pos.x, pos.y, r));
+                if (itemProb(_gen) < 0.1)
+                {
+                    Item::ItemType r =
+                        static_cast<Item::ItemType>(rareItems[randRare(_gen)]);
+                    i._itemData.push_back(
+                        std::make_unique<Item>(pos.x, pos.y, r));
+                }
+                else if (itemProb(_gen) < 0.35)
+                {
+                    Item::ItemType r = static_cast<Item::ItemType>(
+                        uncommonItems[randUncommon(_gen)]);
+                    i._itemData.push_back(
+                        std::make_unique<Item>(pos.x, pos.y, r));
+                }
+                else
+                {
+                    Item::ItemType r = static_cast<Item::ItemType>(
+                        commonItems[randCommon(_gen)]);
+                    i._itemData.push_back(
+                        std::make_unique<Item>(pos.x, pos.y, r));
+                }
             }
         }
     }

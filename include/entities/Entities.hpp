@@ -10,4 +10,5 @@
 #include "Wolf.hpp"
 #include "Wizard.hpp"
 #include "Item.hpp"
+#include "UltCharge.hpp"
 

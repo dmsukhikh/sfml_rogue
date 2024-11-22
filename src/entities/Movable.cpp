@@ -55,7 +55,7 @@ void game::Movable::move(float delta)
             if (poisonDamage == POISONLIMIT)
             {
                 poisonDamage = 0;
-                hasPoisoned = true;
+                hasPoisoned = false;
             }
         }
     }

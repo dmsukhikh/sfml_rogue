@@ -10,7 +10,10 @@ void game::AbstractShot::setGamer(game::Gamer *newGamer)
     gamerLink = newGamer;
 }
 
-game::AbstractShot::AbstractShot(float x, float y) : Movable(x, y) {}
+game::AbstractShot::AbstractShot(float x, float y) : Movable(x, y) 
+{
+    type = EntityType::Shot;
+}
 
 game::AbstractShot::AbstractShot() : game::AbstractShot(0, 0) {}
 

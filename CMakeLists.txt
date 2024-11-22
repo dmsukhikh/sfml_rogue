@@ -36,7 +36,8 @@ add_library(entities src/entities/Entity.cpp
                      src/entities/Wolf.cpp
                      src/entities/Fireball.cpp
                      src/entities/Wizard.cpp
-                     src/entities/Item.cpp)
+                     src/entities/Item.cpp
+                     src/entities/UltCharge.cpp)
 
 add_library(vecmath src/vecmath.cpp)
 

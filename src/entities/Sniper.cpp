@@ -71,6 +71,19 @@ void game::Sniper::move(float delta)
     _sprite.move(_speed * delta);
     _hitbox.move(_speed * delta);
     _circle.move(_speed * delta);
+
+    if (hasShocked || hasPoisoned)
+    {
+        auto col = _sprite.getFillColor();
+        col.a = 160;
+        _sprite.setFillColor(col);
+    }
+    else
+    {
+        auto col = _sprite.getFillColor();
+        col.a = 255;
+        _sprite.setFillColor(col);
+    }
 }
 
 void game::Sniper::stop(float delta, sf::Vector2f def)

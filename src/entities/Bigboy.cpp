@@ -53,6 +53,19 @@ void game::Bigboy::rotate(float x, float y)
 
 void game::Bigboy::move(float delta)
 {
+    if (hasShocked || hasPoisoned)
+    {
+        auto col = _sprite.getFillColor();
+        col.a = 160;
+        _sprite.setFillColor(col);
+    }
+    else
+    {
+        auto col = _sprite.getFillColor();
+        col.a = 255;
+        _sprite.setFillColor(col);
+    }
+
     if (stopState.first)
     {
         stop(delta, stopState.second);

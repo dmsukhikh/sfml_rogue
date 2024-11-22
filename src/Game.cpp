@@ -34,7 +34,6 @@ game::Game::Game()
     game::AbstractEnemy::setScreenSize(sf::Vector2f{
         1.f * _settings.screenSize.first, 1.f * _settings.screenSize.second});
     mapManager.generateNewLevel();
-
 }
 
 void game::Game::_setGreetingWindow()
@@ -227,6 +226,10 @@ void game::Game::_inputHandling()
             {
                 gamer.dash();
             }
+            else if (ev.key.code == sf::Keyboard::E)
+            {
+                gamer.isUlting = true;
+            }
             else if (ev.key.code == sf::Keyboard::Tab)
             {
                 _isMinimapShowed = true;
@@ -258,6 +261,10 @@ void game::Game::_inputHandling()
             else if (ev.key.code == sf::Keyboard::Tab)
             {
                 _isMinimapShowed = false;
+            }
+            else if (ev.key.code == sf::Keyboard::E)
+            {
+                gamer.isUlting = false;
             }
         }
 
@@ -394,6 +401,16 @@ void game::Game::_ingameHandling(float delta)
         }
     }
 
+    if (gamer.isUlting)
+    {
+        auto shot = gamer.ult(delta);
+        if (shot.has_value())
+        {
+            onMapEntities.push_back(std::move(shot.value()));
+        }
+
+    }
+
     // Искуственный интеллект
     for (auto &obj: onMapEntities)
     {
@@ -462,18 +479,27 @@ void game::Game::_ingameHandling(float delta)
         }
     }
 
-    if (gamer.getHp() == 0 && gamer.lives-- == 0)
+    if (gamer.getHp() == 0)
     {
-        std::cout << "Final score: " << gamer.score << std::endl;
-        _gameIsRunning = false;
-        _showingWindowIdx = 0;
-        onMapEntities.clear();
-        mapManager.generateNewLevel();
-        room = 0;
-        level = 1;
-        enemies = 1;
-        _initializeRoom(0);
-        gamer = game::Gamer(Entity::BLOCK_SIZE*3.f, Entity::BLOCK_SIZE*3.f);
+        if (gamer.lives > 0)
+        {
+            gamer.addItem(Item::HEALING);
+            gamer.lives--;
+        }
+        else
+        {
+            std::cout << "Final score: " << gamer.score << std::endl;
+            _gameIsRunning = false;
+            _showingWindowIdx = 0;
+            onMapEntities.clear();
+            mapManager.generateNewLevel();
+            room = 0;
+            level = 1;
+            enemies = 1;
+            _initializeRoom(0);
+            gamer =
+                game::Gamer(Entity::BLOCK_SIZE * 3.f, Entity::BLOCK_SIZE * 3.f);
+        }
     }
 }
 
@@ -612,9 +638,21 @@ void game::Game::_showGameHUD()
     huddash.setOutlineColor(sf::Color::Black);
     huddash.setOutlineThickness(2.f);
 
+    tempstr = "ult: " + std::to_string(gamer.getUltCharge()) + "%";
+    sf::Text hudult(tempstr, _hudfont, 30);
+
+    hudult.setPosition(cam.getCenter() +
+                       sf::Vector2f{cam.getSize().x / 2.f - 230 - 150,
+                                    cam.getSize().y / 3.f + 100});
+
+    hudult.setFillColor(sf::Color::Red);
+    hudult.setOutlineColor(sf::Color::Black);
+    hudult.setOutlineThickness(2.f);
+
     _curWin.draw(hudhp);
     _curWin.draw(hudscore);
     _curWin.draw(huddash);
+    _curWin.draw(hudult);
 }
 
 

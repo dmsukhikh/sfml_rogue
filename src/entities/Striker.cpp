@@ -77,6 +77,19 @@ void game::Striker::move(float delta)
     _hitbox.move(_speed * delta);
 
     shotCD += delta; 
+
+    if (hasShocked || hasPoisoned)
+    {
+        auto col = _sprite.getFillColor();
+        col.a = 160;
+        _sprite.setFillColor(col);
+    }
+    else
+    {
+        auto col = _sprite.getFillColor();
+        col.a = 255;
+        _sprite.setFillColor(col);
+    }
 }
 
 void game::Striker::setPos(float x, float y)

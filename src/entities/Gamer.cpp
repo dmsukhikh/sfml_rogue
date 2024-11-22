@@ -4,10 +4,11 @@
 #include "../../include/entities/Bullets.hpp"
 #include "../../include/entities/Lazer.hpp"
 #include "../../include/entities/Item.hpp"
+#include "../../include/entities/UltCharge.hpp"
 #include <cmath>
 #include <memory>
 #include <cstdlib>
-#include <iostream>
+#include <optional>
 
 
 std::random_device game::Gamer::r{};
@@ -95,6 +96,7 @@ void game::Gamer::move(float delta)
     // в функции move
     shotCDclock += delta;
     if (getDashCharge() < 100) dashCDClock += delta;
+    if (getUltCharge() < 100) ultCDClock += delta;
     if (withVampirism && vampireCnt >= vampireLimit && _hp < maxHP)
     {
         vampireCnt = 0;
@@ -121,12 +123,13 @@ void game::Gamer::move(float delta)
 
             case Item::SHOOTSPEED_UP:
                 shotCD = shotCD * (std::pow(0.9, items[Item::SHOOTSPEED_UP]));
+                lazerCD = lazerCD * (std::pow(0.9, items[Item::LAZER]));
                 break;
 
             case Item::HEALING:
                 if (maxHP - _hp > 0)
                 {
-                    _hp++;
+                    _hp += std::ceil((maxHP - _hp)/2.f);
                 }
                 break;
 
@@ -135,11 +138,11 @@ void game::Gamer::move(float delta)
                 break;
 
             case Item::ULT_IMPROVE:
-                // будет в будущем
+                ultCD *= 0.8;
                 break;
 
             case Item::DASH_IMPROVE:
-                dashCD *= 0.75;
+                dashCD *= 0.8;
                 break;
 
             case Item::POISON:
@@ -298,3 +301,22 @@ int game::Gamer::getDashCharge() const
 {
     return 100 * (dashCDClock / dashCD);
 }
+
+int game::Gamer::getUltCharge() const
+{
+    return 100 * (ultCDClock / ultCD);
+}
+
+
+std::optional<std::unique_ptr<game::Movable>> game::Gamer::ult(float delta)
+{
+    if (ultCDClock >= ultCD)
+    {
+        ultCDClock = 0;
+        auto ret = std::make_unique<game::UltCharge>(getPos().x, getPos().y);
+        ret->masterType = EntityType::Gamer;
+        return ret;
+    }
+    return std::nullopt;
+}
+
