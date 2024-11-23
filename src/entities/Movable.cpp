@@ -1,13 +1,17 @@
 #include "../../include/entities/Movable.hpp"
+#include "../../include/SoundManager.hpp"
 #include "../../include/vecmath.hpp"
+#include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <cmath>
 #include <cstdint>
 
 int game::Movable::IDGEN = 0;
+int game::Movable::VOLUME = 50;
 float game::Movable::SHOCKCD = 3.f;
 float game::Movable::POISONCD = 1.f;
 float game::Movable::POISONLIMIT = 3;
+game::SoundManager game::Movable::soundManager{};
 
 
 game::Movable::Movable(float x, float y) : Entity(x, y) 
@@ -141,4 +145,11 @@ int game::Movable::getId() const
 sf::Vector2f game::Movable::getSpeed() const
 {
     return _speed;
+}
+
+void game::Movable::play(const sf::SoundBuffer &op)
+{
+    sound.setBuffer(op);
+    sound.setVolume(VOLUME);
+    sound.play();
 }

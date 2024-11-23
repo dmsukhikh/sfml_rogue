@@ -6,8 +6,10 @@
 #include <memory>
 #include <random>
 #include <stdexcept>
-#include <iostream>
 #include <queue>
+
+std::random_device game::MapManager::_rd{};
+const uint32_t game::MapManager::LEVELNUM = 10;
 
 game::Map::Map(const Map &op)
 {

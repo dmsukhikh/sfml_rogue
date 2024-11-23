@@ -1,7 +1,10 @@
 #pragma once
 #include "Entity.hpp"
+#include <SFML/Audio/Sound.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <cstdint>
+#include "../SoundManager.hpp"
+
 
 namespace game
 {
@@ -12,15 +15,19 @@ class Movable : public Entity
     // пока что это не нужно
 
   protected:
+    static SoundManager soundManager;
     static int IDGEN;
     static float SHOCKCD, POISONCD, POISONLIMIT;
 
+    sf::Sound sound;
+    void play(const sf::SoundBuffer &op);
+
     int id;
     int bounty = 0;
-    float _SIZE = 50;
-    float _MAXSPEEDABS = 400;
-    float _ACCABS = 1500;
-    float _SLOWDOWNABS = 600;
+    float _SIZE = BLOCK_SIZE;
+    float _MAXSPEEDABS = 8*BLOCK_SIZE;
+    float _ACCABS = 30*BLOCK_SIZE;
+    float _SLOWDOWNABS = 12*BLOCK_SIZE;
     float _angle = 0;
     sf::Vector2f _speed = {0, 0};
     uint16_t _hp = 5;
@@ -28,6 +35,7 @@ class Movable : public Entity
     float shockClock = 0, poisonClock = 0, poisonDamage = 0;
 
   public:
+    static int VOLUME;
     int _xmovement = 0, _ymovement = 0;
     bool isExisted = true, hasShocked = false, hasExplosive = false,
          hasPoisoned = false;

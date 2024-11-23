@@ -11,8 +11,9 @@ struct Settings
     Settings();
     ~Settings();
 
-    std::pair<uint32_t, uint32_t> screenSize;
+    unsigned videoModeIdx;
     sf::Color bgcol;
+    unsigned volume;
 
   private:
     void _writeDefaultToFile(std::fstream &f);

@@ -21,6 +21,8 @@ add_library(base src/Game.cpp
                  src/Settings.cpp
                  src/MapManager.cpp)
 
+add_library(sound src/SoundManager.cpp)
+
 add_library(entities src/entities/Entity.cpp
                      src/entities/Wall.cpp
                      src/entities/Gamer.cpp
@@ -49,7 +51,7 @@ target_include_directories(dependencies_interface INTERFACE include
 target_link_libraries(dependencies_interface INTERFACE
                       sfml-system sfml-window sfml-graphics sfml-audio)
 
-target_link_libraries(entities PUBLIC vecmath)
+target_link_libraries(entities PUBLIC vecmath sound)
 target_link_libraries(dependencies_interface INTERFACE base gamegui entities)
 
 add_executable(main src/main.cpp)

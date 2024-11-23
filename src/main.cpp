@@ -11,5 +11,4 @@ int main()
 {
     game::Game game;
     game.mainloop();
-    
 }

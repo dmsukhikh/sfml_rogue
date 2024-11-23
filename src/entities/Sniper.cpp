@@ -11,7 +11,7 @@
 
 game::Sniper::Sniper(float x, float y) : Striker(x, y)
 {
-    _MAXSPEEDABS = 310;
+    _MAXSPEEDABS *= 1.55f;
     bounty = 300;
     addshotCD = randShotCD(gen);
     _circle = sf::CircleShape(Entity::BLOCK_SIZE/5.f);
@@ -112,6 +112,7 @@ std::optional<std::unique_ptr<game::Movable>> game::Sniper::shot(float delta)
         auto t = Lazer::getLazer(getPos(), _angle);
         auto it = std::make_unique<Lazer>(t);
         it->masterType = EntityType::Enemy;
+        play(soundManager.laserBuf);
         return it;
     }
     return std::nullopt;

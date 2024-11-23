@@ -11,7 +11,8 @@ const float game::Fireball::beatingTime = 5;
 
 game::Fireball::Fireball(float x, float y) : AbstractShot(x, y)
 {
-    _MAXSPEEDABS = 150;
+    play(soundManager.fireballBuf);
+    _MAXSPEEDABS *= 1.f;
     _sprite = sf::CircleShape(BLOCK_SIZE);
     _sprite.setFillColor(sf::Color::Red);
     _sprite.setOrigin({BLOCK_SIZE/2.f, BLOCK_SIZE/2.f});
@@ -124,6 +125,7 @@ void game::Fireball::collideHandling(Movable &op)
 
 void game::Fireball::_explode()
 {
+    play(soundManager.explosionBuf);
     isMoving = false;
     _sprite.setScale({2.f, 2.f});
 }

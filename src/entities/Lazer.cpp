@@ -54,6 +54,7 @@ game::Lazer::getLazer(sf::Vector2f pos, float angle)
     game::Lazer::Lazer(float x, float y)
     : AbstractShot(x, y)
 {
+    play(soundManager.laserBuf);
     type = EntityType::Shot;
 }
 

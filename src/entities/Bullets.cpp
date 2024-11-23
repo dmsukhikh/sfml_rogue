@@ -25,6 +25,7 @@ game::Shot::Shot(float x, float y) : AbstractShot(x, y)
     _speed = {_MAXSPEEDABS, _MAXSPEEDABS};
     _sprite.setPosition(x, y);
     type = EntityType::Shot;
+    play(soundManager.shotBuf);
 }
 
 game::Shot::Shot() : game::Shot(0, 0) {}
@@ -93,7 +94,8 @@ void game::Shot::collideHandling(Entity &op)
 void game::Shot::collideHandling(Movable &op)
 {
     if (isExisted && collide(op) && op.getType() != masterType &&
-        op.getType() != EntityType::DashedGamer)
+        op.getType() != EntityType::DashedGamer &&
+        op.getType() != EntityType::Shot)
     {
         giveDamage(op);
         isExisted = false;

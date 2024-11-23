@@ -75,12 +75,12 @@ game::Item::Item(float x, float y, ItemType t) : Entity(x, y), itemType(t)
 
     _sprite.setTexture(_t);
     _dissprite.setTexture(_dist);
-    _sprite.setScale({_sprite.getTextureRect().width / BLOCK_SIZE,
-                      _sprite.getTextureRect().height / BLOCK_SIZE});
-    _sprite.setPosition(x*BLOCK_SIZE, y*BLOCK_SIZE);
-    _dissprite.setScale({_sprite.getTextureRect().width / BLOCK_SIZE,
-                      _sprite.getTextureRect().height / BLOCK_SIZE});
-    _dissprite.setPosition(x*BLOCK_SIZE, y*BLOCK_SIZE);
+    _sprite.setScale({BLOCK_SIZE / _sprite.getTextureRect().width,
+                      BLOCK_SIZE / _sprite.getTextureRect().height});
+    _sprite.setPosition(x * BLOCK_SIZE, y * BLOCK_SIZE);
+    _dissprite.setScale({BLOCK_SIZE / _sprite.getTextureRect().width,
+                         BLOCK_SIZE / _sprite.getTextureRect().height});
+    _dissprite.setPosition(x * BLOCK_SIZE, y * BLOCK_SIZE);
 }
 
 void game::Item::show(sf::RenderWindow &win) const

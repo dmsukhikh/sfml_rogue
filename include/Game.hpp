@@ -4,6 +4,7 @@
 #include "entities/Entities.hpp"
 #include "MapManager.hpp"
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/VideoMode.hpp>
 #include <vector>
 #include <list>
 
@@ -15,8 +16,12 @@ class Game
     sf::RenderWindow _curWin;
     std::vector<GridPacker> _guiScreens;
     std::size_t _showingWindowIdx = 0;
-    std::string _res, _curvolume, _cursens;
+    std::string _res, _curvolume, _volumeLabel, _warning, _result;
     sf::Font _hudfont;
+
+    std::vector<sf::VideoMode> mods;
+    int volume = 50;
+    size_t videoModeIdx = 0;
 
     bool _gameIsRunning = false,
          _keyMoveLeftIsPressed = false,
@@ -29,7 +34,7 @@ class Game
     MapManager mapManager;
     std::list<std::unique_ptr<Movable>> onMapEntities;
 
-    uint32_t level = 3, room = 0, enemies = 6;
+    uint32_t level = 1, room = 0, enemies = 2;
     sf::Clock _frameClock;
     sf::View cam, actCam;
     sf::Vector2i _view = {0, 0};
@@ -38,9 +43,9 @@ class Game
     void _setMenusWindows();
     void _setSettingsWindow();
     void _setGreetingWindow();
-    void _setGameGui();
     void _showGameHUD();
     void _showMinimap();
+    void _setEnd();
 
     void _gameloop();
     void _inputHandling();

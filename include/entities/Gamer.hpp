@@ -28,7 +28,7 @@ class Gamer : public Movable
     bool isShooting = false, isUlting = false;
     int score = 0, vampireCnt = 0, lives = 0;
 
-    Gamer(float x, float y);
+    Gamer(float x, float y, bool setGamerLink = false);
     Gamer();
 
     void show(sf::RenderWindow &win) const override;

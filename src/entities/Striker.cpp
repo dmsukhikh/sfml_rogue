@@ -116,6 +116,7 @@ std::optional<std::unique_ptr<game::Movable>> game::Striker::shot(float delta)
         auto it = std::make_unique<game::Shot>(getPos().x, getPos().y);
         it->masterType = EntityType::Enemy;
         it->rotate(_angle);
+        play(soundManager.shotBuf);
         return it;
     }
     return std::nullopt;

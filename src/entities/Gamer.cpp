@@ -13,7 +13,8 @@
 
 std::random_device game::Gamer::r{};
 
-game::Gamer::Gamer(float x, float y) : Movable(x, y), gen(r())
+game::Gamer::Gamer(float x, float y, bool setGamerLink)
+    : Movable(x, y), gen(r())
 {
     _sprite.setPointCount(3);
     _sprite.setPoint(0, {0, _SIZE*fsqrt(3)/2});
@@ -27,7 +28,7 @@ game::Gamer::Gamer(float x, float y) : Movable(x, y), gen(r())
     _hp = maxHP;
     type = game::EntityType::Gamer;
 
-    AbstractShot::setGamer(this);
+    if (setGamerLink) AbstractShot::setGamer(this);
 
     for (int i = 0; i < Item::ITEMSCOUNT; ++i)
     {
@@ -230,7 +231,7 @@ std::optional<std::unique_ptr<game::Movable>> game::Gamer::shot(float delta)
             auto ret = std::make_unique<game::Shot>(getPos().x, getPos().y);
             ret->col = sf::Color::Green;
             ret->rotate(_angle);
-            ret->setSpeed(1500);
+            ret->setSpeed(30*BLOCK_SIZE);
             ret->masterType = EntityType::Gamer;
             ret->damage = plainDamage;
 
@@ -271,6 +272,7 @@ int game::Gamer::getMaxHp() const { return maxHP; }
 void game::Gamer::addItem(Item::ItemType itype)
 {
     items[static_cast<int>(itype)]++;
+    play(soundManager.itemPickBuf);
 }
 
 bool game::Gamer::getVampirism() const
@@ -282,6 +284,7 @@ void game::Gamer::dash()
 {
     if (dashCDClock >= dashCD)
     {
+        play(soundManager.fireballBuf);
         dashCDClock = 0;
         if (vabs(_speed) < 10e-4)
         {

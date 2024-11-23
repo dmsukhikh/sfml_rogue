@@ -7,12 +7,13 @@
 game::Bigboy::Bigboy(float x, float y) : AbstractEnemy(x, y)
 {
     bounty = 250;
-    _MAXSPEEDABS = 250;
+    _MAXSPEEDABS *= 0.75f;
     _hp = 15;
     _sprite = sf::CircleShape(BLOCK_SIZE*0.66f, 5);
     _sprite.setOrigin({BLOCK_SIZE/2.f, BLOCK_SIZE/2.f});
     _sprite.setFillColor({255, 190, 190});
     _hitbox = sf::RectangleShape({BLOCK_SIZE, BLOCK_SIZE});
+    _hitbox.setOrigin({BLOCK_SIZE/2.f, BLOCK_SIZE/2.f});
     _sprite.setPosition(x, y);
     _hitbox.setPosition(x, y);
 }

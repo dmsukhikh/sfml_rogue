@@ -11,8 +11,9 @@ game::UltCharge::UltCharge(float x, float y) : AbstractShot(x, y)
     _sprite = sf::CircleShape(10);
     col = {200, 200, 255};
     _sprite.setFillColor(col);
-    _sprite.setOrigin({100, 100});
+    _sprite.setOrigin(_sprite.getLocalBounds().getSize()/2.f);
     _sprite.setPosition({x, y});
+    play(soundManager.ultBuf);
 }
 
 game::UltCharge::UltCharge() : game::UltCharge(0, 0) {}
@@ -46,7 +47,7 @@ void game::UltCharge::move(float delta)
 {
     if (lifetime <= expandTime)
     {
-        _sprite.setRadius(200*(lifetime/expandTime));
+        _sprite.setRadius(4*BLOCK_SIZE*(lifetime/expandTime));
         _sprite.setOrigin(_sprite.getLocalBounds().getSize()/2.f);
     }
 

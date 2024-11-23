@@ -7,38 +7,49 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/VideoMode.hpp>
-#include <iostream>
 #include <algorithm>
 #include <memory>
 #include <random>
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 using Anchor = game::GridPacker::Anchor;
 
-game::Game::Game()
+game::Game::Game() : gamer(0, 0, true)
 {
-    _curWin.create(
-        sf::VideoMode(_settings.screenSize.first, _settings.screenSize.second),
-        "SFML: Rogue");
+    std::vector<std::pair<unsigned int, unsigned int>> m = {
+        {540, 955}, {680, 1204}, {800, 1410}, {1024, 1820}};
+    for (auto &[x, y]: m)
+    {
+        mods.push_back({y, x}); 
+    }
+
+    Entity::BLOCK_SIZE = 50.f * m[_settings.videoModeIdx].first/1024;
+    Movable::VOLUME = _settings.volume;
+    gamer = Gamer();
+    mapManager = std::move(MapManager());
+
+    _curWin.create(mods[_settings.videoModeIdx], "SFML: Rogue");
     _curWin.setFramerateLimit(75);
     _curWin.setKeyRepeatEnabled(false);
     _hudfont.loadFromFile("resources/ThaleahFat.ttf");
-    cam.setSize({_settings.screenSize.first*1.f, _settings.screenSize.second*1.f});
-    cam.setCenter({_settings.screenSize.first*0.5f, _settings.screenSize.second*0.5f});
+    cam.setSize({mods[_settings.videoModeIdx].width * 1.f,
+                 1.f * mods[_settings.videoModeIdx].height});
+    cam.setCenter({mods[_settings.videoModeIdx].width * 0.5f,
+                   0.5f * mods[_settings.videoModeIdx].height});
     _curWin.setView(cam);
     actCam = cam;
     gamer.setPos(200, 200);
     _setMenusWindows();
-    game::AbstractEnemy::setScreenSize(sf::Vector2f{
-        1.f * _settings.screenSize.first, 1.f * _settings.screenSize.second});
+    game::AbstractEnemy::setScreenSize(cam.getSize());
     mapManager.generateNewLevel();
 }
 
 void game::Game::_setGreetingWindow()
 {
-    GridPacker greet(_settings.screenSize.first, _settings.screenSize.second),
+    GridPacker greet(cam.getSize().x, cam.getSize().y),
                btnsTray(200, 200);
 
     game::Button newGame(200, 300), settings(200, 150), exit(200, 150),
@@ -76,10 +87,11 @@ void game::Game::_setGreetingWindow()
 
 void game::Game::_setSettingsWindow()
 {
-    game::Slider volume(10, 50, 0, 100), sens(10, 50, 0, 100);
+    game::Slider volume(10, 50, 0, 100);
     game::Button resolutionLeft(30, 30), resolutionRight(30, 30),
                  apply(10, 10), exit(10, 10), stub(10, 10);
 
+    videoModeIdx = _settings.videoModeIdx;
     resolutionLeft.setText("<");
     resolutionRight.setText(">");
     apply.setText("Apply");
@@ -88,9 +100,39 @@ void game::Game::_setSettingsWindow()
     stub.setBgColor(_settings.bgcol);
     stub.setOutlineColor(_settings.bgcol);
 
-    _res = "1200x720", _curvolume = "50", _cursens = "50";
+    _res = std::to_string(mods[videoModeIdx].width) + "x" +
+           std::to_string(mods[videoModeIdx].height),
+    _curvolume = std::to_string(_settings.volume), _volumeLabel = "Volume ";
+    _warning = "Settings are applied after restarting the game";
     game::Label outputRes(10, 50, _res), curVolume(10, 50, _curvolume),
-        curSens(10, 50, _cursens);
+        volumeLabel(10, 50, _volumeLabel), warning(10, 50, _warning);
+
+    resolutionLeft.setFunc(
+        [this]()
+        {
+            if (!videoModeIdx)
+                videoModeIdx = mods.size();
+            videoModeIdx--;
+            _res = std::to_string(mods[videoModeIdx].width) + "x" +
+                   std::to_string(mods[videoModeIdx].height);
+        });
+
+    resolutionRight.setFunc(
+        [this]()
+        {
+            videoModeIdx++;
+            if (videoModeIdx == mods.size())
+                videoModeIdx = 0;
+            _res = std::to_string(mods[videoModeIdx].width) + "x" +
+                   std::to_string(mods[videoModeIdx].height);
+        });
+
+    apply.setFunc(
+        [this]()
+        {
+            _settings.videoModeIdx = videoModeIdx;
+            _settings.volume = std::stoi(_curvolume);
+        });
 
     volume.setFunc(
         [volume, this](double scale)
@@ -99,25 +141,16 @@ void game::Game::_setSettingsWindow()
                 std::to_string(static_cast<int>(volume.getBorders().y * scale));
         });
 
-    sens.setFunc(
-        [sens, this](double scale)
-        {
-            _cursens =
-                std::to_string(static_cast<int>(sens.getBorders().y * scale));
-        });
-
     exit.setFunc([this]() { _showingWindowIdx = 0; });
 
-    game::GridPacker main(_settings.screenSize.first, _settings.screenSize.second),
-                     volstring(_settings.screenSize.first, 10),
-                     sensstr(_settings.screenSize.first, 10),
-                     resstr(_settings.screenSize.first, 10),
-                     manageBtns(_settings.screenSize.first, 10);
+    game::GridPacker main(cam.getSize().x, cam.getSize().y),
+                     volstring(cam.getSize().x, 10),
+                     resstr(cam.getSize().x, 10),
+                     manageBtns(cam.getSize().x, 10);
 
-    volstring.putObject(volume, 0, 0, Anchor::EXPAND, Anchor::FIXED);
-    volstring.putObject(curVolume, 0, 1, Anchor::EXPAND, Anchor::FIXED);
-    sensstr.putObject(sens, 0, 0, Anchor::EXPAND, Anchor::FIXED);
-    sensstr.putObject(curSens, 0, 1, Anchor::EXPAND, Anchor::FIXED);
+    volstring.putObject(volumeLabel, 0, 0, Anchor::EXPAND, Anchor::FIXED);
+    volstring.putObject(volume, 0, 1, Anchor::EXPAND, Anchor::FIXED);
+    volstring.putObject(curVolume, 0, 2, Anchor::EXPAND, Anchor::FIXED);
     resstr.putObject(resolutionLeft, 0, 0);
     resstr.putObject(resolutionRight, 0, 2);
     resstr.putObject(outputRes, 0, 1);
@@ -128,10 +161,9 @@ void game::Game::_setSettingsWindow()
     manageBtns.putObject(apply, 0, 1);
     manageBtns.putObject(exit, 0, 4);
 
-    main.putObject(stub, 0, 0);
     main.putObject(stub, 5, 0);
     main.putObject(volstring, 1, 0);
-    main.putObject(sensstr, 2, 0);
+    main.putObject(warning, 0, 0);
     main.putObject(resstr, 3, 0);
     main.putObject(manageBtns, 4, 0);
 
@@ -142,7 +174,7 @@ void game::Game::_setMenusWindows()
 {
     _setGreetingWindow();
     _setSettingsWindow();
-    _setGameGui();
+    _setEnd();
 }
 
 void game::Game::mainloop()
@@ -172,14 +204,6 @@ void game::Game::mainloop()
     }
 }
 
-void game::Game::_setGameGui()
-{
-    // функцию убрать, строку 50 тоже
-
-    game::GridPacker gui(_settings.screenSize.first,
-                         _settings.screenSize.second);
-    _guiScreens.push_back(gui);
-}
 
 void game::Game::_gameloop()
 {
@@ -190,6 +214,8 @@ void game::Game::_gameloop()
     _showObjects();
 }
 
+void bob()
+{}
 
 void game::Game::_inputHandling()
 {
@@ -200,7 +226,9 @@ void game::Game::_inputHandling()
         {
             if (ev.key.code == sf::Keyboard::Escape)
             {
-                _curWin.close();
+                bob();
+                _gameIsRunning = false;
+                _showingWindowIdx = 0;
             }
             else if (ev.key.code == sf::Keyboard::A)
             {
@@ -488,9 +516,9 @@ void game::Game::_ingameHandling(float delta)
         }
         else
         {
-            std::cout << "Final score: " << gamer.score << std::endl;
             _gameIsRunning = false;
-            _showingWindowIdx = 0;
+            _result = "You result: " + std::to_string(gamer.score);
+            _showingWindowIdx = 2;
             onMapEntities.clear();
             mapManager.generateNewLevel();
             room = 0;
@@ -506,13 +534,13 @@ void game::Game::_ingameHandling(float delta)
 void game::Game::_moveCamera()
 {
     sf::Vector2f newview = gamer.getPos();
-    newview.x = std::max(_settings.screenSize.first/2.f, newview.x);
+    newview.x = std::max(cam.getSize().x/2.f, newview.x);
     newview.x = std::min(newview.x, mapManager.getRoom(room).width -
-                                        _settings.screenSize.first / 2.f);
+                                        cam.getSize().x / 2.f);
 
-    newview.y = std::max(_settings.screenSize.second/2.f, newview.y);
+    newview.y = std::max(cam.getSize().y/2.f, newview.y);
     newview.y = std::min(newview.y, mapManager.getRoom(room).height -
-                                        _settings.screenSize.second / 2.f);
+                                        cam.getSize().y / 2.f);
     cam.setCenter(newview);
     _curWin.setView(cam);
 }
@@ -611,9 +639,11 @@ void game::Game::_showGameHUD()
 {
     std::string tempstr = std::to_string(gamer.getHp()) + "\\" +
                            std::to_string(gamer.getMaxHp()) + " hp";
-    sf::Text hudhp(tempstr, _hudfont, 30);
-    hudhp.setPosition(cam.getCenter() - cam.getSize() / 2.f +
-                      sf::Vector2f{50, 20});
+    sf::Text hudhp(tempstr, _hudfont, Entity::BLOCK_SIZE*0.6f);
+    hudhp.setPosition(
+        cam.getCenter() - cam.getSize() / 2.f +
+        sf::Vector2f{Entity::BLOCK_SIZE, Entity::BLOCK_SIZE * 0.4f});
+
     hudhp.setFillColor(sf::Color::Red);
     hudhp.setOutlineColor(sf::Color::Black);
     hudhp.setOutlineThickness(2.f);
@@ -621,29 +651,33 @@ void game::Game::_showGameHUD()
     std::stringstream scoreStream;
     scoreStream << "score: " << std::setfill('0') << std::setw(7) << gamer.score;
     tempstr = std::string(std::istreambuf_iterator(scoreStream), {});
-    sf::Text hudscore(tempstr, _hudfont, 30);
+    sf::Text hudscore(tempstr, _hudfont, Entity::BLOCK_SIZE*0.6f);
     hudscore.setPosition(
         cam.getCenter() +
-        sf::Vector2f{cam.getSize().x / 2.f - 230, -cam.getSize().y / 2.f + 20});
+        sf::Vector2f{cam.getSize().x / 2.f - 4.6f * Entity::BLOCK_SIZE,
+                     -cam.getSize().y / 2.f + 0.4f * Entity::BLOCK_SIZE});
+
     hudscore.setFillColor(sf::Color::Red);
     hudscore.setOutlineColor(sf::Color::Black);
     hudscore.setOutlineThickness(2.f);
 
     tempstr = "dash: " + std::to_string(gamer.getDashCharge()) + "%";
-    sf::Text huddash(tempstr, _hudfont, 30);
+    sf::Text huddash(tempstr, _hudfont, Entity::BLOCK_SIZE*0.6f);
     huddash.setPosition(
         cam.getCenter() +
-        sf::Vector2f{cam.getSize().x / 2.f - 230, cam.getSize().y / 3.f + 100});
+        sf::Vector2f{cam.getSize().x / 2.f - 4.6f * Entity::BLOCK_SIZE,
+                     cam.getSize().y / 3.f + 2.f * Entity::BLOCK_SIZE});
     huddash.setFillColor(sf::Color::Red);
     huddash.setOutlineColor(sf::Color::Black);
     huddash.setOutlineThickness(2.f);
 
     tempstr = "ult: " + std::to_string(gamer.getUltCharge()) + "%";
-    sf::Text hudult(tempstr, _hudfont, 30);
+    sf::Text hudult(tempstr, _hudfont, Entity::BLOCK_SIZE*0.6f);
 
-    hudult.setPosition(cam.getCenter() +
-                       sf::Vector2f{cam.getSize().x / 2.f - 230 - 150,
-                                    cam.getSize().y / 3.f + 100});
+    hudult.setPosition(
+        cam.getCenter() +
+        sf::Vector2f{cam.getSize().x / 2.f - 7.6f * Entity::BLOCK_SIZE,
+                     cam.getSize().y / 3.f + 2.f * Entity::BLOCK_SIZE});
 
     hudult.setFillColor(sf::Color::Red);
     hudult.setOutlineColor(sf::Color::Black);
@@ -680,13 +714,18 @@ void game::Game::_showMinimap()
         for (auto &j: mapManager.curGraph[i])
         {
             if (j > i) break;
-            sf::RectangleShape link({vabs(dots[j] - dots[i])+10, 10});
+            sf::RectangleShape link(
+                {vabs(dots[j] - dots[i]) + Entity::BLOCK_SIZE / 5.f,
+                 Entity::BLOCK_SIZE / 5.f});
+
             link.setOrigin({0, 5});
             link.setFillColor({50, 50, 50});
             link.setOutlineThickness(2.f);
             link.setOutlineColor(sf::Color::Black);
-            link.setPosition(dots[i]+sf::Vector2f{25,25});
-            link.setRotation(360-vdeg(dots[j]-dots[i], {1, 0}));
+            link.setPosition(
+                dots[i] +
+                sf::Vector2f{Entity::BLOCK_SIZE, Entity::BLOCK_SIZE} * 0.5f);
+            link.setRotation(360 - vdeg(dots[j] - dots[i], {1, 0}));
             _curWin.draw(link);
         }
     }
@@ -694,7 +733,7 @@ void game::Game::_showMinimap()
 
     for (int i = 0; i < mapManager.LEVELNUM; ++i)
     {
-        sf::RectangleShape roomrect({50, 50});
+        sf::RectangleShape roomrect({Entity::BLOCK_SIZE, Entity::BLOCK_SIZE});
         sf::Color roomcol = sf::Color::Magenta;
         if (!mapManager.getRoom(i).isCleared && i != room)
         {
@@ -716,7 +755,7 @@ void game::Game::_showMinimap()
         roomrect.setFillColor(roomcol);
         roomrect.setPosition(dots[i]);
         
-        sf::Text number(std::to_string(i), _hudfont, 40);
+        sf::Text number(std::to_string(i), _hudfont, 0.8f*Entity::BLOCK_SIZE);
         number.setPosition(
             roomrect.getPosition() + roomrect.getSize() / 2.f -
             sf::Vector2f{number.getLocalBounds().width * 0.5f,
@@ -736,7 +775,38 @@ void game::Game::_showMinimap()
     std::string temp = "Level: " + std::to_string(level);
     sf::Text lvlhud(temp, _hudfont);
     lvlhud.setOrigin({lvlhud.getLocalBounds().width * 0.2f, 0});
-    lvlhud.setPosition(cam.getCenter() -
-                       sf::Vector2f{0, cam.getSize().y / 2.f - 20}); 
+    lvlhud.setPosition(
+        cam.getCenter() -
+        sf::Vector2f{0, cam.getSize().y / 2.f - Entity::BLOCK_SIZE * 0.4f});
     _curWin.draw(lvlhud);
+}
+
+void game::Game::_setEnd()
+{
+    GridPacker greet(cam.getSize().x, cam.getSize().y),
+               forText(30, 30);
+
+    game::Button exit(200, 150),
+                 centerVoid(10, 10);
+
+    game::Label res(10, 10, _result);
+
+    exit.setText("Exit");
+    exit.setFunc([this](){ 
+            _showingWindowIdx = 0; 
+        });
+
+    centerVoid.setBgColor(_settings.bgcol);
+    centerVoid.setToggleColor(_settings.bgcol);
+    centerVoid.setOutlineColor(_settings.bgcol);
+
+    forText.putObject(centerVoid, 0, 1);
+    forText.putObject(res, 0, 0);
+
+    greet.putObject(centerVoid, 0, 0);
+    greet.putObject(forText, 1, 0);
+    greet.putObject(centerVoid, 2, 0);
+    greet.putObject(centerVoid, 4, 0);
+    greet.putObject(exit, 3, 0);
+    _guiScreens.push_back(greet);
 }

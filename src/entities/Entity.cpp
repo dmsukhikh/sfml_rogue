@@ -8,7 +8,7 @@ game::EntityType game::Entity::getType() const
     return type;
 }
 
-const float game::Entity::BLOCK_SIZE = 50.;
+float game::Entity::BLOCK_SIZE = 50.;
 
 sf::Vector2f game::Entity::getPos() const
 {

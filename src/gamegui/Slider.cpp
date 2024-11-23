@@ -4,7 +4,6 @@
 #include <SFML/System/Vector2.hpp>
 #include <functional>
 #include <memory>
-#include <iostream>
 
 class game::Slider::_cimpl
 {

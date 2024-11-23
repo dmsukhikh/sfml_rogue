@@ -34,7 +34,7 @@ struct Map
 
 class MapManager
 {
-    std::random_device _rd;
+    static std::random_device _rd;
     std::mt19937 _gen;
     std::uniform_int_distribution<int> _randmap;
 
@@ -43,7 +43,7 @@ class MapManager
     std::vector<Map> pool; 
 
   public:
-    const uint32_t LEVELNUM = 10;
+    static const uint32_t LEVELNUM;
     std::vector<std::vector<int>> curGraph;
     MapManager();
     void generateNewLevel();

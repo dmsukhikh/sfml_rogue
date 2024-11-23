@@ -36,7 +36,7 @@ class Entity
     EntityType type = EntityType::None;
 
   public:
-    const static float BLOCK_SIZE;
+    static float BLOCK_SIZE;
 
     Entity();
     Entity(float x, float y);
