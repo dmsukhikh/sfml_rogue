@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
 project('rogue')
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
 find_package(SFML COMPONENTS system window graphics audio REQUIRED)
