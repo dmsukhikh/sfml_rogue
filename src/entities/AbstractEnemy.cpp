@@ -1,6 +1,5 @@
 #include "../../include/entities/AbstractEnemy.hpp"
 #include "../../include/MapManager.hpp"
-#include <SFML/System/Vector2.hpp>
 #include <stdexcept>
 #include <random>
 #include <queue>

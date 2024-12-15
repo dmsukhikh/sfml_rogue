@@ -237,7 +237,7 @@ void game::MapManager::generateNewLevel()
                                         Item::SPEED_UP, Item::SHOCK},
                          uncommonItems = {Item::LAZER, Item::ULT_IMPROVE,
                                           Item::DASH_IMPROVE, Item::POISON,
-                                          Item::VAMPIRE},
+                                          Item::VAMPIRE, Item::EXPLODE},
                          rareItems = {Item::NEW_LIVE};
 
         std::uniform_int_distribution<int> randCommon(0, commonItems.size() - 1),

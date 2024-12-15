@@ -1,8 +1,8 @@
 #pragma once
 #include "Movable.hpp"
 #include "../../include/entities/Gamer.hpp"
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
+#include "SFML/Graphics/CircleShape.hpp"
+#include "SFML/Graphics/RectangleShape.hpp"
 #include <memory>
 
 namespace game

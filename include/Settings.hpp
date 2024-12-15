@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <utility>
 #include <fstream>
-#include <SFML/Graphics/Color.hpp>
+#include "SFML/Graphics/Color.hpp"
 
 namespace game
 {

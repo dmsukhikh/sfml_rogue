@@ -1,8 +1,6 @@
 #include "../../include/entities/Movable.hpp"
 #include "../../include/SoundManager.hpp"
 #include "../../include/vecmath.hpp"
-#include <SFML/Audio/SoundBuffer.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <cmath>
 #include <cstdint>
 

@@ -1,5 +1,5 @@
 #include "GuiObject.hpp"
-#include <SFML/Graphics.hpp>
+#include "SFML/Graphics.hpp"
 #include <memory>
 #include <functional>
 #include <string>

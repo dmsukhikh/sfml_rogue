@@ -1,6 +1,4 @@
 #include "../../include/entities/Bigboy.hpp"
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
 #include <memory>
 #include "../../include/vecmath.hpp"
 

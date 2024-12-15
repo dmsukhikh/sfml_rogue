@@ -1,5 +1,4 @@
 #include "../../include/gamegui/Image.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
 
 
 game::Image::Image(const std::string &filename)

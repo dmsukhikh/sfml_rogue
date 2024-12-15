@@ -1,6 +1,4 @@
 #include "../../include/gamegui/GuiObject.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/Window/Event.hpp>
 
 game::GuiObject::GuiObject(uint64_t w, uint64_t h) : _height(h), _width(w) {}
 

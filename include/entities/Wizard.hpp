@@ -1,5 +1,5 @@
 #include "Striker.hpp"
-#include <SFML/Graphics/RectangleShape.hpp>
+#include "SFML/Graphics/RectangleShape.hpp"
 
 namespace game
 {

@@ -1,10 +1,8 @@
 #include "../../include/gamegui/GridPacker.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <cstdint>
 #include <memory>
 #include <vector>
 #include <map>
-#include <iostream>
 
 class game::GridPacker::_cimpl
 {

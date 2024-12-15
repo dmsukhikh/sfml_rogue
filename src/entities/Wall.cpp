@@ -1,6 +1,4 @@
 #include "../../include/entities/Tiles.hpp"
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
 #include <memory>
 
 game::Wall::Wall(float x, float y) : Entity(x, y) 

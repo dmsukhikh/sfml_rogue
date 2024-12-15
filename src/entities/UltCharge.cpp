@@ -1,5 +1,4 @@
 #include "../../include/entities/UltCharge.hpp"
-#include <SFML/Graphics/Rect.hpp>
 #include <vector>
 
 const float game::UltCharge::expandTime = 3.f;

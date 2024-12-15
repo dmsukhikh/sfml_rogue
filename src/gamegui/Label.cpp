@@ -1,5 +1,4 @@
 #include "../../include/gamegui/Label.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <cstdint>
 #include <memory>
 

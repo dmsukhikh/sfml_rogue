@@ -1,6 +1,6 @@
 #pragma once
 #include "GuiObject.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
+#include "SFML/Graphics/RenderWindow.hpp"
 #include <memory>
 #include <vector>
 

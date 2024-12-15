@@ -1,8 +1,5 @@
 #include "../../include/entities/Fireball.hpp"
 #include "../../include/vecmath.hpp"
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <cmath>
 #include <memory>
 

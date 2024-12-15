@@ -1,6 +1,5 @@
 #include "../../include/entities/Gamer.hpp"
 #include "../../include/vecmath.hpp"
-#include <SFML/System/Vector2.hpp>
 #include "../../include/entities/Bullets.hpp"
 #include "../../include/entities/Lazer.hpp"
 #include "../../include/entities/Item.hpp"
@@ -17,11 +16,11 @@ game::Gamer::Gamer(float x, float y, bool setGamerLink)
     : Movable(x, y), gen(r())
 {
     _sprite.setPointCount(3);
-    _sprite.setPoint(0, {0, _SIZE*fsqrt(3)/2});
+    _sprite.setPoint(0, {0, _SIZE*static_cast<float>(sqrt(3))/2});
     _sprite.setPoint(1, {_SIZE/2, 0});
-    _sprite.setPoint(2, {_SIZE, _SIZE*fsqrt(3)/2});
+    _sprite.setPoint(2, {_SIZE, _SIZE*static_cast<float>(sqrt(3))/2});
     _sprite.setFillColor({180, 220, 180});
-    _sprite.setOrigin({_SIZE/2, _SIZE*fsqrt(3)/3});
+    _sprite.setOrigin({_SIZE/2, _SIZE*static_cast<float>(sqrt(3))/3});
     _sprite.setPosition(_x, _y);
     _hitbox = _sprite;
     maxHP = 10;

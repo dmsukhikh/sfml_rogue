@@ -1,5 +1,4 @@
 #include "../../include/entities/Tiles.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
 
 game::Floor::Floor(float x, float y) : Entity(x, y) 
 {

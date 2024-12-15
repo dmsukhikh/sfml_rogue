@@ -1,7 +1,7 @@
 #pragma once
 #include "Entity.hpp"
-#include <SFML/Audio/Sound.hpp>
-#include <SFML/System/Vector2.hpp>
+#include "SFML/Audio/Sound.hpp"
+#include "SFML/System/Vector2.hpp"
 #include <cstdint>
 #include "../SoundManager.hpp"
 

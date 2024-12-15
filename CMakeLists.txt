@@ -43,16 +43,17 @@ add_library(entities src/entities/Entity.cpp
 
 add_library(vecmath src/vecmath.cpp)
 
-
-
 target_include_directories(dependencies_interface INTERFACE include 
                                                             include/gamegui
                                                             include/entities)
 target_link_libraries(dependencies_interface INTERFACE
                       sfml-system sfml-window sfml-graphics sfml-audio)
 
-target_link_libraries(entities PUBLIC vecmath sound)
-target_link_libraries(dependencies_interface INTERFACE base gamegui entities)
+target_link_libraries(sound PUBLIC dependencies_interface)
+target_link_libraries(gamegui PUBLIC dependencies_interface)
+target_link_libraries(base PUBLIC dependencies_interface)
+target_link_libraries(vecmath PUBLIC dependencies_interface)
+target_link_libraries(entities PUBLIC vecmath sound dependencies_interface)
 
 add_executable(main src/main.cpp)
-target_link_libraries(main dependencies_interface)
+target_link_libraries(main PUBLIC base gamegui entities)

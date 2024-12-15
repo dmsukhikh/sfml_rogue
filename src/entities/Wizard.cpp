@@ -1,6 +1,5 @@
 #include "../../include/entities/Wizard.hpp"
 #include "../../include/entities/Fireball.hpp"
-#include <SFML/Graphics/RectangleShape.hpp>
 
 game::Wizard::Wizard(float x, float y) : Striker(x, y)
 {

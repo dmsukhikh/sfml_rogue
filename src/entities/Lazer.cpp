@@ -1,7 +1,4 @@
 #include "../../include/entities/Lazer.hpp"
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <memory>
 #include "../../include/vecmath.hpp"
 #include <cmath>

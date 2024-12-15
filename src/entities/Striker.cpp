@@ -1,7 +1,6 @@
 #include "../../include/entities/Striker.hpp"
 #include "../../include/entities/Bullets.hpp"
 #include "../../include/vecmath.hpp"
-#include <SFML/System/Vector2.hpp>
 #include <cstdlib>
 #include <memory>
 #include <cmath>

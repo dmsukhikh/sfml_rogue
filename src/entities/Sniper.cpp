@@ -1,8 +1,5 @@
 #include "../../include/entities/Sniper.hpp"
 #include "../../include/entities/Lazer.hpp"
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/System/Vector2.hpp>
 #include "../../include/vecmath.hpp"
 #include <memory>
 #include <optional>

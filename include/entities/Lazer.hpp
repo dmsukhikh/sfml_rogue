@@ -1,7 +1,7 @@
 #pragma once
 #include "Movable.hpp"
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
+#include "SFML/Graphics/CircleShape.hpp"
+#include "SFML/Graphics/RectangleShape.hpp"
 #include "Bullets.hpp"
 #include <memory>
 #include <map>

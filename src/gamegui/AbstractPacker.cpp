@@ -1,5 +1,4 @@
 #include "../../include/gamegui/AbstractPacker.hpp"
-#include <SFML/Graphics/RenderWindow.hpp>
 #include <cstdint>
 #include <memory>
 #include "../../include/gamegui/Button.hpp"
