@@ -1,0 +1,6 @@
+.cache
+build
+compile_commands.json
+.clang-format
+resources/barinov.jpg
+thoughts.txt
