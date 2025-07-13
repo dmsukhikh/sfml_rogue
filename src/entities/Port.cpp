@@ -68,6 +68,11 @@ void game::Port::changeActiveness(bool isActive)
     }
 }
 
+void game::Port::accept(EntitiesVisitor &visitor)
+{
+    visitor.visitPort(*this);
+}
+
 // ----
 
 game::LevelPort::LevelPort(float x, float y) : Port(x, y) 
@@ -83,4 +88,9 @@ game::LevelPort::LevelPort() : game::LevelPort(0, 0) {}
 std::unique_ptr<game::Entity> game::LevelPort::copy() const
 {
     return std::make_unique<game::LevelPort>(*this);
+}
+
+void game::LevelPort::accept(EntitiesVisitor &visitor)
+{
+    visitor.visitLevelPort();
 }

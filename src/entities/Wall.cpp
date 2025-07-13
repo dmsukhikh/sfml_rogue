@@ -36,3 +36,8 @@ std::unique_ptr<game::Entity> game::Wall::copy() const
 {
     return std::make_unique<Wall>(*this);
 }
+
+void game::Wall::accept(EntitiesVisitor &visitor)
+{
+    visitor.visitWall(*this);
+}

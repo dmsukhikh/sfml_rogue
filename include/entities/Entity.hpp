@@ -7,6 +7,8 @@
 namespace game
 {
 
+class EntitiesVisitor;
+
 enum class EntityType
 {
     // !!!!!!!!!!!!
@@ -47,5 +49,7 @@ class Entity
     virtual bool collide(const Entity &op) const = 0;
     virtual std::unique_ptr<Entity> copy() const = 0;
     sf::Vector2f getPos() const;
+
+    virtual void accept(EntitiesVisitor &visitor);
 };
 }

@@ -2,6 +2,7 @@
 #include "Entity.hpp"
 #include <cstdint>
 #include <memory>
+#include "entitiesVisitor.hpp"
 
 namespace game
 {
@@ -18,6 +19,8 @@ protected:
     std::vector<sf::FloatRect> getHitboxes() const override;
     bool collide(const Entity &op) const override;
     std::unique_ptr<Entity> copy() const override;
+
+    void accept(EntitiesVisitor &visitor) override;
 };
 
 class Floor : public Entity
@@ -60,6 +63,8 @@ public:
     void setIdx(uint64_t idx);
     uint64_t getIdx() const;
     std::unique_ptr<Entity> copy() const override;
+
+    void accept(EntitiesVisitor &visitor) override;
 };
 
 class LevelPort : public Port
@@ -68,5 +73,7 @@ class LevelPort : public Port
     LevelPort();
     LevelPort(float x, float y);
     std::unique_ptr<Entity> copy() const override;
+
+    void accept(EntitiesVisitor &visitor) override;
 };
 } // namespace game

@@ -1,10 +1,14 @@
 #pragma once
+#include "Gamer.hpp"
+#include "Tiles.hpp"
+#include "entitiesVisitor.hpp"
 #include "gamegui/GameGUI.hpp"
 #include "Settings.hpp"
 #include "entities/Entities.hpp"
 #include "MapManager.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "SFML/Window/VideoMode.hpp"
+#include "entitiesVisitor.hpp"
 #include <vector>
 #include <list>
 
@@ -13,11 +17,14 @@ namespace game
 class Game
 {
     Settings _settings;
+    std::shared_ptr<EntitiesVisitor> _visitor;
     sf::RenderWindow _curWin;
     std::vector<GridPacker> _guiScreens;
     std::size_t _showingWindowIdx = 0;
     std::string _res, _curvolume, _volumeLabel, _warning, _result;
     sf::Font _hudfont;
+
+    float ingameDelta = 0.1;
 
     std::vector<sf::VideoMode> mods;
     int volume = 50;
@@ -28,7 +35,8 @@ class Game
          _keyMoveRightIsPressed = false,
          _keyMoveUpIsPressed = false,
          _keyMoveDownIsPressed = false,
-         _isMinimapShowed = false;
+         _isMinimapShowed = false,
+         _needNewLevel = false;
 
     Gamer gamer;
     MapManager mapManager;
@@ -56,9 +64,15 @@ class Game
     void _generateEnemies();
     void _initializeRoom(size_t room);
 
+
   public:
     Game();
     void mainloop();
+
+    // for visitors
+    void visitWall(Wall &wall);
+    void visitPort(Port &port);
+    void visitLevelPort();
 };
 
 }; // namespace game

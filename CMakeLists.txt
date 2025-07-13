@@ -5,8 +5,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 
 find_package(SFML COMPONENTS system window graphics audio REQUIRED)
 
-
-
 add_library(dependencies_interface INTERFACE)
 add_library(gamegui src/gamegui/GuiObject.cpp
                     src/gamegui/Button.cpp
@@ -19,7 +17,8 @@ add_library(gamegui src/gamegui/GuiObject.cpp
 
 add_library(base src/Game.cpp
                  src/Settings.cpp
-                 src/MapManager.cpp)
+                 src/MapManager.cpp
+                 src/entitiesVisitor.cpp)
 
 add_library(sound src/SoundManager.cpp)
 

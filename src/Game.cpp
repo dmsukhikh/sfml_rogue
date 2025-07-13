@@ -7,6 +7,7 @@
 #include "SFML/System/Vector2.hpp"
 #include "SFML/Window/Keyboard.hpp"
 #include "SFML/Window/VideoMode.hpp"
+#include "entitiesVisitor.hpp"
 #include <algorithm>
 #include <memory>
 #include <random>
@@ -45,6 +46,8 @@ game::Game::Game() : gamer(0, 0, true)
     _setMenusWindows();
     game::AbstractEnemy::setScreenSize(cam.getSize());
     mapManager.generateNewLevel();
+
+    _visitor = std::make_shared<DefaultVisitor>(this);
 }
 
 void game::Game::_setGreetingWindow()
@@ -207,15 +210,12 @@ void game::Game::mainloop()
 
 void game::Game::_gameloop()
 {
-    auto delta = _frameClock.restart().asSeconds();
+    ingameDelta = _frameClock.restart().asSeconds();
 
     _inputHandling();
-    _ingameHandling(delta);
+    _ingameHandling(ingameDelta);
     _showObjects();
 }
-
-void bob()
-{}
 
 void game::Game::_inputHandling()
 {
@@ -226,7 +226,6 @@ void game::Game::_inputHandling()
         {
             if (ev.key.code == sf::Keyboard::Escape)
             {
-                bob();
                 _gameIsRunning = false;
                 _showingWindowIdx = 0;
             }
@@ -347,32 +346,14 @@ void game::Game::_showObjects()
 
 void game::Game::_ingameHandling(float delta)
 {
-    bool _needNewLevel = false;
+    _needNewLevel = false;
     auto t = _curWin.mapPixelToCoords(_view);
     for (auto &&i: mapManager.getRoom(room)._data)
     {
         // Столкновения игрока с тайлами карты
         if (gamer.collide(*i))
         {
-            switch (i->getType())
-            {
-                case game::EntityType::Wall:
-                    gamer.stop(delta, i->getPos() - gamer.getPos());
-                    break;
-
-                case game::EntityType::Port:
-                    _initializeRoom(reinterpret_cast<Port &>(*i).getIdx());
-                    break;
-
-                case game::EntityType::LevelPort:
-                    _needNewLevel = true;
-                    enemies += 2;
-                    gamer.score += level*1000;
-                    break;
-
-                default:
-                    break;
-            }
+            i->accept(*_visitor);
         }
 
         // Столкновения сущностей с тайлами карты
@@ -809,4 +790,21 @@ void game::Game::_setEnd()
     greet.putObject(centerVoid, 4, 0);
     greet.putObject(exit, 3, 0);
     _guiScreens.push_back(greet);
+}
+
+void game::Game::visitWall(Wall &i)
+{
+    gamer.stop(ingameDelta, i.getPos() - gamer.getPos());
+}
+
+void game::Game::visitPort(Port &port)
+{
+    _initializeRoom(port.getIdx());
+}
+
+void game::Game::visitLevelPort()
+{
+    _needNewLevel = true;
+    enemies += 2; 
+    gamer.score += level*1000;
 }
